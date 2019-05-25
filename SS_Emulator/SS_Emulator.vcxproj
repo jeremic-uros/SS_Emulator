@@ -119,6 +119,8 @@
     <ClInclude Include="Parser.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Lexer.cpp" />
+    <ClCompile Include="Test.cpp" />
     <ClCompile Include="Parser.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
