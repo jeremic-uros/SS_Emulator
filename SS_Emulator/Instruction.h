@@ -47,7 +47,7 @@ namespace codes {
 
 }
 
-class Instruction : ParsedLine {
+class Instruction : public ParsedLine {
 private:
 	std::string name;	 // instrucion symbol 
 	unsigned char operandAttributes;	// bit values: ( 0 - operandSize[0 = one byte , 1 = two bytes] , 1 - low or high bits )
@@ -57,6 +57,7 @@ private:
 	unsigned char srcAddr;			//
 public:
 	Instruction() : ParsedLine() {}
+	~Instruction() {}
 
 	std::string getName() const { return name; }
 	Instruction& setName(std::string nm) { name = nm; }
