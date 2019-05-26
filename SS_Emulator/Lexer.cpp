@@ -1,7 +1,9 @@
 #include "Lexer.h"
+#include "AssemblerException.h"
 #include <regex>
 #include <algorithm>
 #include <iostream>
+
 
 
 Lexer* Lexer::lexer = nullptr;
@@ -20,14 +22,26 @@ std::queue<std::string>* Lexer::tokenize(std::string line)
 	std::queue<std::string>* tokens = new std::queue<std::string>();
 	std::transform(line.begin(), line.end(), line.begin(), ::tolower); // all letters to lower case for ease
 	std::string token = "";
+	int numOfMatchedChars = 0; // used to test if there are more chars than there should be
 	try {
 		std::smatch match;
 		std::regex allowedCharacters("[(a-z0-9\[&$*:\\]\.)]+");
-		while (std::regex_search(line, match, allowedCharacters)) {
+		std::string temp = line;
+		while (std::regex_search(temp, match, allowedCharacters)) {
 			token = match.str(0);
+			numOfMatchedChars += token.size();
 			tokens->push(token);
-			line = match.suffix().str();
+			temp = match.suffix().str();
+			
 		}
+
+
+		// Needs refactoring, and a another design possibly
+		int t = (line.find(',') == std::string::npos) ? 0 : 1;
+		int numOfWhiteSpace = std::count(line.begin(), line.end(), ' ');
+		int numOfTabs = std::count(line.begin(), line.end(), '	');
+		if ((numOfMatchedChars + t) != (line.length() - numOfWhiteSpace - numOfTabs)) throw util::AssemblerException("LEXER ERROR: To many unallowed characters");
+
 	}
 	catch (std::regex_error& e) {
 		std::cout << e.what() << std::endl; 
