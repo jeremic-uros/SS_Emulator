@@ -6,7 +6,8 @@
 #include <regex>
 
 class ParsedLine;
-
+class Instruction;
+class Directive;
 
 class Parser {
 private:
@@ -18,6 +19,8 @@ public:
 	ParsedLine* parse(std::queue<std::string>* tokens); // tokens provided from the lexer
 	std::string isLabeled(std::string token);	// check if token is a label and returns name, otherwise returns null
 	unsigned char parseType(std::string token); // used on first or second token if labeled to determine Type
+	std::string parseInstructionName(std::string token, unsigned char&  instAttr);	// returns instruction name, to be used only after type parsing; also updates instruction attributes
+	void parseInstructionOperands(std::queue<std::string>* tokens,Instruction* inst); // parse Instrucion information and update the Instruction object provided as 2nd param
 };
 
 #endif  

@@ -39,43 +39,71 @@ namespace codes {
 	std::unordered_map<std::string, unsigned char> addressingCodes = {
 		{"imm"   ,    0},
 		{"regdir",    1},
-		{"regind",    2},
-		{"regindx8",  3},
-		{"regindx16", 4},
+		{"regin",    2},
+		{"reginx8",  3},
+		{"reginx16", 4},
 		{"mem",		  5}
 	};			
 
+	std::unordered_map<std::string, unsigned char> numOfOperands = {
+			{"halt", 0},
+			{"xchg", 2},
+			{"int" , 1},
+			{"mov" , 2},
+			{"add" , 2},
+			{"sub" , 2},
+			{"mul" , 2},
+			{"div" , 2},
+			{"cmp" , 2},
+			{"not" , 1},
+			{"and" , 2},
+			{"or"  , 2},
+			{"xor" , 2},
+			{"test", 2},
+			{"shl" , 2},
+			{"shr" , 2},
+			{"push", 1},
+			{"pop" , 1},
+			{"jmp" , 1},
+			{"jeq" , 1},
+			{"jne" , 1},
+			{"jgt" , 1},
+			{"call", 1},
+			{"ret" , 0},
+			{"iret", 0},
+	};
 }
 
 class Instruction : public ParsedLine {
 private:
 	std::string name;	 // instrucion symbol 
-	unsigned char operandAttributes;	// bit values: ( 0 - operandSize[0 = one byte , 1 = two bytes] , 1 - low or high bits )
-	unsigned short dstField;        //
-	unsigned char dstAddr;			//  only fields needed are filed, rest are undefined
-	unsigned short srcField;		//
-	unsigned char srcAddr;			//
+	unsigned char operandAttributes=0;	// bit values: ( 0 - operandSize[0 = one byte , 1 = two bytes] , 1 - low or high bits for first opr, 2 - low or high for second opr )
+	std::string firstOprField="";				//
+	unsigned char firstOprAddr=0;				//  only fields needed are filed, rest are undefined
+	std::string secondOprField="";				//
+	unsigned char secondOprAddr=0;				//
 public:
 	Instruction() : ParsedLine() {}
+	Instruction(unsigned char typ, std::string lbl, unsigned char sz = 0) : ParsedLine(typ,lbl,sz) {}
 	~Instruction() {}
 
 	std::string getName() const { return name; }
-	Instruction& setName(std::string nm) { name = nm; }
+	void setName(std::string nm) { name = nm; }
 
 	unsigned char getOperandAttributes() const { return operandAttributes; }
-	Instruction& setOperandAttributes(unsigned char oprAttr) { operandAttributes = oprAttr; }
+	void setOperandAttributes(unsigned char oprAttr) { operandAttributes = oprAttr; }
 
-	unsigned short getDstField() const { return dstField; }
-	Instruction& setDstField(unsigned short dVal) { dstField = dVal; }
+	std::string getFirstOprField() const { return firstOprField; }
+	void setFirstOprField(std::string dVal) { firstOprField = dVal; }
 
-	unsigned char getDstAddr() const { return dstAddr; }
-	Instruction& setDstAddr(unsigned char dAddr) { dstAddr = dAddr; }
+	unsigned char getFirstOprAddr() const { return firstOprAddr; }
+	void setFirstOprAddr(unsigned char dAddr) { firstOprAddr = dAddr; }
 
-	unsigned short getSrcField() const { return srcField; }
-	Instruction& setSrcField(unsigned short sVal) { srcField = sVal; }
+	std::string getSecondOprField() const { return secondOprField; }
+	void setSecondOprField(std::string sVal) { secondOprField = sVal; }
 
-	unsigned char getSrcAddr() const { return srcAddr; }
-	Instruction&  setSrcAddr(unsigned char sAddr) { srcAddr = sAddr; }
+	unsigned char getSecondOprAddr() const { return secondOprAddr; }
+	void  setSecondOprAddr(unsigned char sAddr) { secondOprAddr = sAddr; }
 
 
 };

@@ -21,7 +21,8 @@ public:
 	enum Types {
 		Inst = 0,
 		Dir = 1,
-		Inv = 2
+		Inv = 2,
+		Label = 3
 	};
 };
 #endif // _PARSED_LINE_H_
