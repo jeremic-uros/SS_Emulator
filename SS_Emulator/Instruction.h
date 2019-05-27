@@ -76,7 +76,6 @@ namespace codes {
 
 class Instruction : public ParsedLine {
 private:
-	std::string name;	 // instrucion symbol 
 	unsigned char operandAttributes=0;	// bit values: ( 0 - operandSize[0 = one byte , 1 = two bytes] , 1 - low or high bits for first opr, 2 - low or high for second opr )
 	std::string firstOprField="";				//
 	unsigned char firstOprAddr=0;				//  only fields needed are filed, rest are undefined
@@ -84,11 +83,8 @@ private:
 	unsigned char secondOprAddr=0;				//
 public:
 	Instruction() : ParsedLine() {}
-	Instruction(unsigned char typ, std::string lbl, unsigned char sz = 0) : ParsedLine(typ,lbl,sz) {}
+	Instruction(unsigned char typ, std::string lbl, std::string nam="",unsigned char sz = 0) : ParsedLine(typ,lbl,nam,sz) {}
 	~Instruction() {}
-
-	std::string getName() const { return name; }
-	void setName(std::string nm) { name = nm; }
 
 	unsigned char getOperandAttributes() const { return operandAttributes; }
 	void setOperandAttributes(unsigned char oprAttr) { operandAttributes = oprAttr; }

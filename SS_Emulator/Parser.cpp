@@ -1,5 +1,6 @@
 #include "Parser.h"
 #include "Instruction.h"
+#include "Directive.h"
 #include "AssemblerException.h"
 #include <iostream>
 
@@ -12,13 +13,17 @@ std::unordered_map<std::string, std::regex> Parser::tokenParsers = {
 	{"label", std::regex("^"+symbolRegex+":$")},
 	{"instruction", std::regex("^(halt|xchg|int|mov|add|sub|mul|div|cmp|not|and|or|xor|test|shl|shr|push|pop|jmp|jeq|jne|jgt|call|ret|iret)(b|w)?$")},
 	{"directive", std::regex("^\.(text|data|bss|equ|global|extern|section|byte|word|align|skip|end)$")},
-	{"val",std::regex("^"+valRegex+"$")},
+	{"symbol", std::regex("^" + symbolRegex + "$")},
+	{"val",std::regex("^" + valRegex + "$")},
+	// instruction operands parsers
 	{"regdir",std::regex("^((r[0-7])|sp|pc)(h|l)?$")},
 	{"regin", std::regex("^(\\[(r[0-7]|sp|pc)\\])$")},
 	{"reginx",std::regex("^r[0-7]\\[("+valRegex+"|"+symbolRegex+")\\]$")},
 	{"pcrel",std::regex("^(\\$|&)"+symbolRegex+"$")},
-	{"symbol", std::regex("^"+symbolRegex+"$")},
-	{"absolut", std::regex("^\\*"+valRegex+"$")}
+	{"absolut", std::regex("^\\*"+valRegex+"$")},
+	// directive params parsers
+	{"expr", std::regex("^("+valRegex+"|"+symbolRegex+")([\\+\\-\\*](" + valRegex + "|" + symbolRegex + "))*"+"$")},
+	{"sectionName",std::regex("^\\."+symbolRegex+"$")}
 
 };
 
@@ -55,13 +60,14 @@ ParsedLine* Parser::parse(std::queue<std::string>* tokens){
 	switch (type){
 	case ParsedLine::Types::Inst:
 		name = parseInstructionName(token, instAttr);
-		parsedLine = new Instruction(ParsedLine::Types::Inst, label);
+		parsedLine = new Instruction(ParsedLine::Types::Inst, label, name);
 		((Instruction*)parsedLine)->setOperandAttributes(instAttr);
-		((Instruction*)parsedLine)->setName(name);
 		parseInstructionOperands(tokens,(Instruction*)parsedLine);
 		break;
 	case ParsedLine::Types::Dir:
-
+		name = token.substr(1, token.size());
+		parsedLine = new Directive(ParsedLine::Types::Dir, label, name);
+		parseDirective(tokens, (Directive*) parsedLine);
 		break;
 	default:
 		throw util::AssemblerException("PARSING ERROR: Instruction or directive not recoqnized"); // stop executing 
@@ -91,7 +97,6 @@ unsigned char Parser::parseType(std::string token){
 }
 
 std::string Parser::parseInstructionName(std::string token, unsigned char & instAttr){
-	//std::smatch match;
 	std::string temp = token;
 	temp.pop_back();
 	if (std::regex_search(temp, tokenParsers.at("instruction"))) {
@@ -109,7 +114,7 @@ std::string Parser::parseInstructionName(std::string token, unsigned char & inst
 void Parser::parseInstructionOperands(std::queue<std::string>* tokens, Instruction * inst){
 	unsigned char tokensToProcess = codes::numOfOperands.at(inst->getName());
 	if (tokens->size() != tokensToProcess) throw util::AssemblerException("PARSING ERROR: To many or to few tokens");
-	unsigned char instructionSize = 3 + tokensToProcess * ((inst->getOperandAttributes() & 1) + 1); // (InstDescr+2*OprDescr) + numOfOperands * operandSize
+	unsigned char instructionSize = 1 + tokensToProcess * ( (inst->getOperandAttributes() & 1) + 2); // InstDescr + numOfOperands * (OprDesr+operandSize)
 
 	bool first = true;
 	while (tokensToProcess > 0) {
@@ -181,6 +186,51 @@ void Parser::parseInstructionOperands(std::queue<std::string>* tokens, Instructi
 	}
 
 	inst->setSize(instructionSize);
+}
+
+void Parser::parseDirective(std::queue<std::string>* tokens, Directive * dir) {
+	std::string name = dir->getName();
+	unsigned char tokensToProcess = codes::numOfParams.at(name);
+	if (tokens->size() != tokensToProcess) { 
+		if ( name != "global" && name != "extern") throw util::AssemblerException("PARSING ERROR: To many or to few tokens"); 
+	}
+
+	std::string param = "";
+	tokensToProcess = tokens->size(); // hack beacuse of global and extern directives
+	bool first = true; // used for equ
+	while (tokensToProcess > 0) {
+		std::string token = tokens->front();
+		tokens->pop();
+		tokensToProcess--;
+
+		
+		if (name == "equ") {
+			if (first && std::regex_search(token, tokenParsers.at("symbol"))) {
+				param = token + ",";
+				first = false;
+			}
+			else if (std::regex_search(token, tokenParsers.at("val"))) {
+				param += token;
+			}
+		}
+		else {
+			std::string parser = codes::directiveParsingGroup.at(name);
+			if (std::regex_search(token, tokenParsers.at(parser))) {
+				if (name == "global" || name == "extern") {
+					param += token + ",";
+				}
+				else param = token;
+			}
+			else throw util::AssemblerException("PARSING ERROR: Invalid directive param");
+		}
+	}
+	unsigned char size = 0;
+	if (name == "word") size = 2;
+	else if (name == "byte") size = 1;
+	else if (name == "skip") size = std::stoi(param);
+	dir->setSize(size);
+	// align has to be determined by the assembler
+	dir->setParam(param);
 }
 
 
