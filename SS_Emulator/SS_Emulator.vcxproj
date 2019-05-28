@@ -115,13 +115,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Assembler.h" />
+    <ClInclude Include="Directive.h" />
+    <ClInclude Include="Instruction.h" />
     <ClInclude Include="Lexer.h" />
+    <ClInclude Include="ParsedLine.h" />
     <ClInclude Include="Parser.h" />
+    <ClInclude Include="AssemblerException.h" />
+    <ClInclude Include="Symbol.h" />
+    <ClInclude Include="Util.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Assembler.cpp" />
     <ClCompile Include="Lexer.cpp" />
     <ClCompile Include="Test.cpp" />
     <ClCompile Include="Parser.cpp" />
+    <ClCompile Include="Util.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
