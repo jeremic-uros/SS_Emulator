@@ -23,8 +23,8 @@ namespace codes {
 
 	std::unordered_map<std::string, std::string> directiveParsingGroup = {
 		{"section","sectionName"},
-		{"global", "symbol"},
-		{"extern","symbol"},
+		{"global", "symbolArray"},
+		{"extern","symbolArray"},
 		{"byte","expr"},
 		{"word","expr"},
 		{"align","val"},

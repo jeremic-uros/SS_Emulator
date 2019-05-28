@@ -1,16 +1,17 @@
 #include "Parser.h"
 #include "Instruction.h"
 #include "Directive.h"
+#include "Util.h"
 #include "AssemblerException.h"
 #include <iostream>
 
 Parser* Parser::parser = nullptr;
 
-std::string valRegex = "([0-9]+|0x[0-9]{1,4})";
+std::string valRegex = "([0-9]+|0x[0-9a-f]{1,4})";
 std::string symbolRegex = "[a-z][a-z0-9]*";
 
 std::unordered_map<std::string, std::regex> Parser::tokenParsers = {
-	{"label", std::regex("^"+symbolRegex+":$")},
+	{"label", std::regex("^" + symbolRegex + ":$")},
 	{"instruction", std::regex("^(halt|xchg|int|mov|add|sub|mul|div|cmp|not|and|or|xor|test|shl|shr|push|pop|jmp|jeq|jne|jgt|call|ret|iret)(b|w)?$")},
 	{"directive", std::regex("^\.(text|data|bss|equ|global|extern|section|byte|word|align|skip|end)$")},
 	{"symbol", std::regex("^" + symbolRegex + "$")},
@@ -18,12 +19,13 @@ std::unordered_map<std::string, std::regex> Parser::tokenParsers = {
 	// instruction operands parsers
 	{"regdir",std::regex("^((r[0-7])|sp|pc)(h|l)?$")},
 	{"regin", std::regex("^(\\[(r[0-7]|sp|pc)\\])$")},
-	{"reginx",std::regex("^r[0-7]\\[("+valRegex+"|"+symbolRegex+")\\]$")},
-	{"pcrel",std::regex("^(\\$|&)"+symbolRegex+"$")},
-	{"absolut", std::regex("^\\*"+valRegex+"$")},
+	{"reginx",std::regex("^r[0-7]\\[(" + valRegex + "|" + symbolRegex + ")\\]$")},
+	{"pcrel",std::regex("^(\\$|&)" + symbolRegex + "$")},
+	{"absolut", std::regex("^\\*" + valRegex + "$")},
 	// directive params parsers
-	{"expr", std::regex("^("+valRegex+"|"+symbolRegex+")([\\+\\-\\*](" + valRegex + "|" + symbolRegex + "))*"+"$")},
-	{"sectionName",std::regex("^\\."+symbolRegex+"$")}
+	{"expr", std::regex("^(" + valRegex + "|" + symbolRegex + ")([\\+\\-\\*](" + valRegex + "|" + symbolRegex + "))*" + "$")},
+	{"sectionName",std::regex("^\\." + symbolRegex + "$")},
+	{"symbolArray", std::regex("^("+symbolRegex+"|,)$") }
 
 };
 
@@ -113,8 +115,10 @@ std::string Parser::parseInstructionName(std::string token, unsigned char & inst
 
 void Parser::parseInstructionOperands(std::queue<std::string>* tokens, Instruction * inst){
 	unsigned char tokensToProcess = codes::numOfOperands.at(inst->getName());
+	unsigned char instructionSize = 1 + tokensToProcess * ((inst->getOperandAttributes() & 1) + 2); // InstDescr + numOfOperands * (OprDesr+operandSize)
+	if (tokensToProcess == 2) tokensToProcess++;
 	if (tokens->size() != tokensToProcess) throw util::AssemblerException("PARSING ERROR: To many or to few tokens");
-	unsigned char instructionSize = 1 + tokensToProcess * ( (inst->getOperandAttributes() & 1) + 2); // InstDescr + numOfOperands * (OprDesr+operandSize)
+	
 
 	bool first = true;
 	while (tokensToProcess > 0) {
@@ -150,8 +154,8 @@ void Parser::parseInstructionOperands(std::queue<std::string>* tokens, Instructi
 		}
 		else if (std::regex_search(token, tokenParsers.at("reginx"))) {
 			token.pop_back();
-			std::string blank = " ";
-			field = token.replace((size_t)2,(size_t)1,blank);
+			std::string comma = ",";
+			field = token.replace((size_t)2,(size_t)1,comma);
 			if (inst->getOperandAttributes() & 1)	addr = codes::addressingCodes.at("reginx16");
 			else addr = codes::addressingCodes.at("reginx8");		
 		}
@@ -177,6 +181,11 @@ void Parser::parseInstructionOperands(std::queue<std::string>* tokens, Instructi
 			inst->setFirstOprField(field);
 			inst->setFirstOprAddr(addr);
 			first = false;
+			if (tokensToProcess > 0) {
+				tokensToProcess--;
+				if (tokens->front() == ",") tokens->pop();
+				else throw util::AssemblerException("PARSING ERROR: Expected ',' after first operand");
+			}
 		}
 		else {
 			inst->setSecondOprField(field);
@@ -191,6 +200,7 @@ void Parser::parseInstructionOperands(std::queue<std::string>* tokens, Instructi
 void Parser::parseDirective(std::queue<std::string>* tokens, Directive * dir) {
 	std::string name = dir->getName();
 	unsigned char tokensToProcess = codes::numOfParams.at(name);
+	if (name == "equ") tokensToProcess++;
 	if (tokens->size() != tokensToProcess) { 
 		if ( name != "global" && name != "extern") throw util::AssemblerException("PARSING ERROR: To many or to few tokens"); 
 	}
@@ -208,6 +218,10 @@ void Parser::parseDirective(std::queue<std::string>* tokens, Directive * dir) {
 			if (first && std::regex_search(token, tokenParsers.at("symbol"))) {
 				param = token + ",";
 				first = false;
+				//Procces the ',' token
+				tokensToProcess--;
+				if (tokens->front() == ",") tokens->pop();
+				else util::AssemblerException("PARSING ERROR: Expected ','");
 			}
 			else if (std::regex_search(token, tokenParsers.at("val"))) {
 				param += token;
@@ -217,7 +231,7 @@ void Parser::parseDirective(std::queue<std::string>* tokens, Directive * dir) {
 			std::string parser = codes::directiveParsingGroup.at(name);
 			if (std::regex_search(token, tokenParsers.at(parser))) {
 				if (name == "global" || name == "extern") {
-					param += token + ",";
+					param += token;
 				}
 				else param = token;
 			}
@@ -227,7 +241,9 @@ void Parser::parseDirective(std::queue<std::string>* tokens, Directive * dir) {
 	unsigned char size = 0;
 	if (name == "word") size = 2;
 	else if (name == "byte") size = 1;
-	else if (name == "skip") size = std::stoi(param);
+	else if (name == "skip") {
+		size = util::convertStringToDecimal(param);
+	}
 	dir->setSize(size);
 	// align has to be determined by the assembler
 	dir->setParam(param);
