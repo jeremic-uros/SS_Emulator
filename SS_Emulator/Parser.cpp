@@ -20,8 +20,9 @@ std::unordered_map<std::string, std::regex> Parser::tokenParsers = {
 	{"regdir",std::regex("^((r[0-7])|sp|pc)(h|l)?$")},
 	{"regin", std::regex("^(\\[(r[0-7]|sp|pc)\\])$")},
 	{"reginx",std::regex("^r[0-7]\\[(" + valRegex + "|" + symbolRegex + ")\\]$")},
-	{"pcrel",std::regex("^(\\$|&)" + symbolRegex + "$")},
+	{"pcrel",std::regex("^\\$" + symbolRegex + "$")},
 	{"absolut", std::regex("^\\*" + valRegex + "$")},
+	{"symbolImm",std::regex("^&" + symbolRegex + "$")},
 	// directive params parsers
 	{"expr", std::regex("^(" + valRegex + "|" + symbolRegex + ")([\\+\\-\\*](" + valRegex + "|" + symbolRegex + "))*" + "$")},
 	{"sectionName",std::regex("^\\." + symbolRegex + "$")},
@@ -165,11 +166,16 @@ void Parser::parseInstructionOperands(std::queue<std::string>* tokens, Instructi
 		}
 		else if (std::regex_search(token, tokenParsers.at("symbol"))) {
 			field = token;
-			addr = -1; // TO BE UPDATED
+			addr = Instruction::addressingCodes.at("mem");
+		}
+		else if (std::regex_search(token, tokenParsers.at("symbolImm"))) {
+			field = token.substr(1, token.size() - 1);
+			addr = Instruction::addressingCodes.at("imm");
 		}
 		else if (std::regex_search(token, tokenParsers.at("pcrel"))) {
 			field = token.substr(1, token.size() - 1);
-			addr = -1; // TO BE UPDATED
+			if (inst->getOperandAttributes() & 1)	addr = Instruction::addressingCodes.at("reginx16");
+			else addr = Instruction::addressingCodes.at("reginx8");
 		}
 		else if (std::regex_search(token, tokenParsers.at("absolut"))) {
 			field = token.substr(1, token.size() - 1);

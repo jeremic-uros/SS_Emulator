@@ -3,11 +3,16 @@
 #include <iomanip>
 #include <regex>
 
-int util::convertStringToDecimal(std::string hexVal){
+int util::convertStringToDecimal(std::string val){
 	std::stringstream ss;
 	int decimal = 0;
-	ss << hexVal;
-	ss >> std::hex >> decimal;
+	try {
+		decimal = stoi(val);
+	}
+	catch (std::invalid_argument e) {
+		ss << val;
+		ss >> std::hex >> decimal;
+	}
 	return decimal;
 }
 
