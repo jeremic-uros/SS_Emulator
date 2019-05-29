@@ -114,7 +114,7 @@ std::string Parser::parseInstructionName(std::string token, unsigned char & inst
 }
 
 void Parser::parseInstructionOperands(std::queue<std::string>* tokens, Instruction * inst){
-	unsigned char tokensToProcess = codes::numOfOperands.at(inst->getName());
+	unsigned char tokensToProcess = Instruction::numOfOperands.at(inst->getName());
 	unsigned char instructionSize = 1 + tokensToProcess * ((inst->getOperandAttributes() & 1) + 2); // InstDescr + numOfOperands * (OprDesr+operandSize)
 	if (tokensToProcess == 2) tokensToProcess++;
 	if (tokens->size() != tokensToProcess) throw util::AssemblerException("PARSING ERROR: To many or to few tokens");
@@ -142,26 +142,26 @@ void Parser::parseInstructionOperands(std::queue<std::string>* tokens, Instructi
 				token.pop_back();
 			}
 			field = token;
-			addr = codes::addressingCodes.at("regdir");
+			addr = Instruction::addressingCodes.at("regdir");
 			instructionSize -= (instAttr & 1) + 1;
 		}
 		else if (std::regex_search(token, tokenParsers.at("regin"))) {
 			field = token.substr(1, 2);
 			if (field == "sp") { field = "r6"; }
 			if (field == "pc") { field = "r7"; }
-			addr = codes::addressingCodes.at("regin");
+			addr = Instruction::addressingCodes.at("regin");
 			instructionSize -= (inst->getOperandAttributes() & 1) + 1;
 		}
 		else if (std::regex_search(token, tokenParsers.at("reginx"))) {
 			token.pop_back();
 			std::string comma = ",";
 			field = token.replace((size_t)2,(size_t)1,comma);
-			if (inst->getOperandAttributes() & 1)	addr = codes::addressingCodes.at("reginx16");
-			else addr = codes::addressingCodes.at("reginx8");		
+			if (inst->getOperandAttributes() & 1)	addr = Instruction::addressingCodes.at("reginx16");
+			else addr = Instruction::addressingCodes.at("reginx8");
 		}
 		else if (std::regex_search(token, tokenParsers.at("val"))) {
 			field = token;
-			addr = codes::addressingCodes.at("imm");
+			addr = Instruction::addressingCodes.at("imm");
 		}
 		else if (std::regex_search(token, tokenParsers.at("symbol"))) {
 			field = token;
@@ -173,7 +173,7 @@ void Parser::parseInstructionOperands(std::queue<std::string>* tokens, Instructi
 		}
 		else if (std::regex_search(token, tokenParsers.at("absolut"))) {
 			field = token.substr(1, token.size() - 1);
-			addr = codes::addressingCodes.at("mem");
+			addr = Instruction::addressingCodes.at("mem");
 		}
 		else throw util::AssemblerException("PARSING ERROR: Invalid operand");
 
@@ -199,7 +199,7 @@ void Parser::parseInstructionOperands(std::queue<std::string>* tokens, Instructi
 
 void Parser::parseDirective(std::queue<std::string>* tokens, Directive * dir) {
 	std::string name = dir->getName();
-	unsigned char tokensToProcess = codes::numOfParams.at(name);
+	unsigned char tokensToProcess = Directive::numOfParams.at(name);
 	if (name == "equ") tokensToProcess++;
 	if (tokens->size() != tokensToProcess) { 
 		if ( name != "global" && name != "extern") throw util::AssemblerException("PARSING ERROR: To many or to few tokens"); 
@@ -228,7 +228,7 @@ void Parser::parseDirective(std::queue<std::string>* tokens, Directive * dir) {
 			}
 		}
 		else {
-			std::string parser = codes::directiveParsingGroup.at(name);
+			std::string parser = Directive::directiveParsingGroup.at(name);
 			if (std::regex_search(token, tokenParsers.at(parser))) {
 				if (name == "global" || name == "extern") {
 					param += token;

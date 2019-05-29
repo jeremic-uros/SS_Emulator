@@ -4,37 +4,13 @@
 #include "ParsedLine.h"
 #include <unordered_map>
 
-namespace codes {
 
-	std::unordered_map<std::string, unsigned char> numOfParams = {
-		{"text",0},
-		{"data",0},
-		{"bss",0},
-		{"section",1},
-		{"equ",2},
-		{"global",-1},
-		{"extern",-1},
-		{"byte",1},
-		{"word",1},
-		{"align",1},
-		{"skip",1},
-		{"end",0},
-	};
-
-	std::unordered_map<std::string, std::string> directiveParsingGroup = {
-		{"section","sectionName"},
-		{"global", "symbolArray"},
-		{"extern","symbolArray"},
-		{"byte","expr"},
-		{"word","expr"},
-		{"align","val"},
-		{"skip","val"},
-	};
-}
 
 class Directive : public ParsedLine {
 private:
 	std::string param = "";
+protected:
+	void write(std::ostream& it) const override;
 public:
 	Directive() : ParsedLine() {}
 	Directive(unsigned char typ, std::string lbl, std::string nam = "", unsigned char sz = 0) : ParsedLine(typ,lbl,nam,sz) {}
@@ -42,6 +18,10 @@ public:
 	std::string getParam() { return param; }
 	void setParam(std::string parm) {	param = parm; }
 
+	void restore(std::string line) override;
+
+	static std::unordered_map<std::string, unsigned char> numOfParams;
+	static std::unordered_map<std::string, std::string> directiveParsingGroup;
 
 };
 #endif // !_DIRECTIVE_H_

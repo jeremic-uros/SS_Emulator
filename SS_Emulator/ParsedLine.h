@@ -5,11 +5,15 @@
 
 class ParsedLine{
 
-protected:
+private:
 	unsigned char type;	// 0 - Instruction 1 - Directive 2 - Invalid line
 	std::string label; // label name
 	unsigned char size;  // mem size in bytes this line needs 
-	std::string name;	// directive or instruction name
+	std::string name;	// directive or instruction name	
+protected:
+	static const char delimiter = '!';
+	virtual void write(std::ostream& it) const;
+	friend std::ostream& operator<< (std::ostream& it, const ParsedLine& pe);
 
 public:
 	ParsedLine() {}
@@ -20,6 +24,9 @@ public:
 	void setSize(unsigned char sz) { size = sz; }
 	std::string getName() const { return name; }
 	void setName(std::string nam) { name = nam; }
+
+	// restores the previoulsy saved ParsedLine with operator<<
+	virtual void restore(std::string);
 
 	enum Types {
 		Inst = 0,
