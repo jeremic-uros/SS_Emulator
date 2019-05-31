@@ -11,10 +11,12 @@ class Directive;
 
 class Parser {
 private:
-	static std::unordered_map<std::string, std::regex> tokenParsers; // map to store all regex used for parsing
+
 	static Parser* parser;
 	Parser();
 public:
+	// map to store all regex used for parsing
+	static std::unordered_map<std::string, std::regex> tokenParsers;
 	static Parser* getParser();	// to avoid memmory loss only one parser can be made
 	
 	/*

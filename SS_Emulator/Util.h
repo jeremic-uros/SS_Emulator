@@ -6,6 +6,7 @@
 namespace util {
 
 	int convertStringToDecimal(std::string); // converts hex or decimal string to int
+	std::string convertDecimalToString(signed short decimal, bool truncateToByte); // converts short to hex string without 0x prefix
 	std::queue<std::string> tokenize(std::string input, std::string delimiter);
 }
 

@@ -20,7 +20,7 @@ void ParsedLine::restore(std::string line){
 	size = util::convertStringToDecimal(tokens.front());
 	tokens.pop();
 	// get name
-	name = tokens.front();
+	if(!tokens.empty()) name = tokens.front();
 }
 
 std::ostream & operator<<(std::ostream & it, const ParsedLine & pe){

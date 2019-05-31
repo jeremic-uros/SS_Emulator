@@ -11,13 +11,14 @@ public:
 	};
 private:
 	std::string name;
-	std::string section;
+	unsigned short section;
 	unsigned short value;
 	enum Type type;
 	unsigned short rb;
 public:
-	Symbol(std::string nm,std::string sec,unsigned short val,Symbol::Type typ,unsigned short rbb) : name(nm),section(sec),value(val),type(typ),rb(rbb) {}
+	Symbol(std::string nm,unsigned short sec,unsigned short val,Symbol::Type typ,unsigned short rbb) : name(nm),section(sec),value(val),type(typ),rb(rbb) {}
 
+	void setType(Type typ) { type = typ; }
 };
 #endif // !_SYMBOL_H_
 

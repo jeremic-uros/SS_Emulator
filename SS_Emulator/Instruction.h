@@ -8,7 +8,14 @@
 
 class Instruction : public ParsedLine {
 private:
-	unsigned char operandAttributes=0;	// bit values: ( 0 - operandSize[0 = one byte , 1 = two bytes] , 1 - low or high bits for first opr, 2 - low or high for second opr )
+	/* 
+		bit values: 
+			0 - operandSize[0 = one byte , 1 = two bytes]
+			1 - low or high bits for first opr
+			2 - low or high for second opr 
+			3 - is pcrel [0 - false , 1 - true] , for creating relocation entries
+	*/
+	unsigned char operandAttributes=0;	
 	std::string firstOprField="";				//
 	unsigned char firstOprAddr=0;				//  only fields needed are filed, rest are undefined
 	std::string secondOprField="";				//

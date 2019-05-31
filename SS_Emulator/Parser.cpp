@@ -144,21 +144,20 @@ void Parser::parseInstructionOperands(std::queue<std::string>* tokens, Instructi
 			}
 			field = token;
 			addr = Instruction::addressingCodes.at("regdir");
-			instructionSize -= (instAttr & 1) + 1;
+			instructionSize -= (instAttr & 1) + 1; // only one byte used for operand
 		}
 		else if (std::regex_search(token, tokenParsers.at("regin"))) {
 			field = token.substr(1, 2);
 			if (field == "sp") { field = "r6"; }
 			if (field == "pc") { field = "r7"; }
 			addr = Instruction::addressingCodes.at("regin");
-			instructionSize -= (inst->getOperandAttributes() & 1) + 1;
+			instructionSize -= (inst->getOperandAttributes() & 1) + 1; // only one byte used for operand
 		}
 		else if (std::regex_search(token, tokenParsers.at("reginx"))) {
 			token.pop_back();
 			std::string comma = ",";
 			field = token.replace((size_t)2,(size_t)1,comma);
-			if (inst->getOperandAttributes() & 1)	addr = Instruction::addressingCodes.at("reginx16");
-			else addr = Instruction::addressingCodes.at("reginx8");
+			addr = Instruction::addressingCodes.at("reginx16"); // if displacment param can be stored in a byte its on assembler to change this
 		}
 		else if (std::regex_search(token, tokenParsers.at("val"))) {
 			field = token;
@@ -174,8 +173,9 @@ void Parser::parseInstructionOperands(std::queue<std::string>* tokens, Instructi
 		}
 		else if (std::regex_search(token, tokenParsers.at("pcrel"))) {
 			field = token.substr(1, token.size() - 1);
-			if (inst->getOperandAttributes() & 1)	addr = Instruction::addressingCodes.at("reginx16");
-			else addr = Instruction::addressingCodes.at("reginx8");
+			unsigned char instAttr = inst->getOperandAttributes();
+			inst->setOperandAttributes(instAttr | 8); // set pc rel flag, for relocation usage
+			addr = Instruction::addressingCodes.at("reginx16");
 		}
 		else if (std::regex_search(token, tokenParsers.at("absolut"))) {
 			field = token.substr(1, token.size() - 1);
