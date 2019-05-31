@@ -20,7 +20,7 @@ std::string util::convertDecimalToString(signed short decimal,bool truncateToByt
 	std::string ret = ss.str();
 	int sz = ret.size();
 	if (truncateToByte) return ret.substr(2, 2 );
-	return ret.substr(0, 2) + " " + ret.substr(2, 2);
+	return ret.substr(2, 2) + " " + ret.substr(0, 2);
 }
 
 std::queue<std::string> util::tokenize(std::string input, std::string delimiter){

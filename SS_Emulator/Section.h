@@ -6,13 +6,14 @@
 
 class Section {
 private:
-	std::string name;
-	unsigned short size;
-	unsigned short rb;
 	std::list<RelocationEntry>* relocationTable = nullptr;
 
 	// flags 
 public:
+	std::string name;
+	unsigned short size;
+	unsigned short rb;
+
 	Section(std::string nam, unsigned short sz,unsigned short rbb ) : name(nam), size(sz), rb(rbb) {}
 	~Section() { if (relocationTable) free(relocationTable); }
 
