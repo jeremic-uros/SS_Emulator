@@ -30,6 +30,8 @@ private:
 	void handleInstruction(Instruction* inst,std::ofstream& out); // used in second run
 	void handleDirective(Directive * dir, std::ofstream& out); // used in second run
 	void handleOperand(std::string field, unsigned char addr, unsigned char attr,std::ofstream& out);
+
+	void formatedOutput();
 public:
 	Assembler(std::string in, std::string out) : inputFileName(in), outputFileName(out) {}
 	bool assemble();

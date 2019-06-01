@@ -344,6 +344,47 @@ void Assembler::handleOperand(std::string field, unsigned char addr, unsigned ch
 	}
 }
 
+void Assembler::formatedOutput(){
+	std::ofstream out;
+	out.open(outputFileName);
+
+	// format and write section table
+	out << "#Section table" << std::endl;
+	out << std::left;
+	out << std::setw(15) << "#name" << std::setw(10) << "size" << std::setw(10) << "rb" << std::endl;
+	for (auto const& sec : sectionTable) 
+		out << sec.second << std::endl;
+
+	//	format and write symbol table
+	out << "#Symbol table" << std::endl;
+	out << std::setw(15) << "#name" << std::setw(10) << "section" << std::setw(10) << "value" << std::setw(10) << "type" << std::setw(10) << "rb" << std::endl;
+	for (auto const& sym : symbolTable) 
+		if (sym.first != "UND") 
+			out << sym.second << std::endl;
+
+	// format and write relocation tables
+	for (auto const& sec : sectionTable) {
+		if (sec.second.relocationTable) {
+			out << std::setw(10) << "#.ret" + sec.second.name << std::endl;
+			out << std::setw(10) << "#offset" << std::setw(12) << "type" << std::setw(10) << "symbol" << std::endl;
+			for (auto const& rel : *sec.second.relocationTable)
+				out << rel << std::endl;
+		}
+	}
+
+	// copy from second work file
+	std::ifstream in;
+	in.open(workFileNameSecondRun);
+	std::string line;
+	while (std::getline(in, line)) {
+		out << line << std::endl;
+	}
+
+	in.close();
+	out.close();
+
+}
+
 
 
 bool Assembler::assemble(){
@@ -356,17 +397,7 @@ bool Assembler::assemble(){
 
 		secondRun();
 
-		std::ofstream out;
-		out.open(outputFileName);
-
-		for (auto const& sym : symbolTable){
-			if (sym.first != undefined) {
-				out << std::setw(10)<< sym.second << std::endl;
-			}
-		}
-
-		out.close();
-
+		formatedOutput();
 	}
 	catch (util::AssemblerException e) {
 		std::cout << e << std::endl;

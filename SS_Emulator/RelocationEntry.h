@@ -25,5 +25,8 @@ public:
 	unsigned short getSymbol() const { return symbol; }
 	void setSymbol(unsigned short sym) { symbol = sym; }
 
+protected:
+	friend std::ostream& operator<< (std::ostream& it, const RelocationEntry& rel);
+
 };
 #endif // ! _RELOCATION_ENTRY_H_

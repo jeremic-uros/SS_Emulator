@@ -5,14 +5,11 @@
 #include <list>
 
 class Section {
-private:
-	std::list<RelocationEntry>* relocationTable = nullptr;
-
-	// flags 
 public:
 	std::string name;
 	unsigned short size;
 	unsigned short rb;
+	std::list<RelocationEntry>* relocationTable = nullptr;
 
 	Section(std::string nam, unsigned short sz,unsigned short rbb ) : name(nam), size(sz), rb(rbb) {}
 	~Section() { if (relocationTable) free(relocationTable); }
@@ -26,6 +23,8 @@ public:
 	unsigned short getRb() const { return rb; }
 
 	void addRelocationEntry(unsigned short offset, RelocationEntry::Type type, unsigned short symbol);
+protected:
+	friend std::ostream& operator<< (std::ostream& it, const Section& sym);
 
 };
 #endif // ! _SECTION_H_
