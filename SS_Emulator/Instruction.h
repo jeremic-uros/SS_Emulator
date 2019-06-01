@@ -49,6 +49,15 @@ public:
 	// possiblly refactoring needed
 	static std::unordered_map<std::string, unsigned char> addressingCodes;
 
+	enum AddrCodes {
+		IMM = 0,
+		REGDIR = 1,
+		REGIN = 2,
+		REGINX8 = 3,
+		REGINX16 = 4,
+		MEM = 5
+	};
+
 	static std::unordered_map<std::string, unsigned char> numOfOperands;
 };
 

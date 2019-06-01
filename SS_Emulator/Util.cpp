@@ -1,6 +1,7 @@
 #include "Util.h"
 #include <sstream>
 #include <iomanip>
+#include <unordered_map>
 #include <regex>
 
 int util::convertStringToDecimal(std::string val){
@@ -34,3 +35,4 @@ std::queue<std::string> util::tokenize(std::string input, std::string delimiter)
 	}
 	return tokens;
 }
+
