@@ -6,7 +6,8 @@ class RelocationEntry{
 public:
 	enum Type {
 		R_386_32 = 0,
-		R_386_PC32 = 1
+		R_386_PC32 = 1,
+		R_386_N32 = 2
 	};
 private:
 	unsigned short offset;

@@ -151,7 +151,7 @@ void Assembler::secondRun() {
 		// free allocated memory
 		free(parsedLine);
 	}
-
+	
 	out.close();
 	in.close();
 
@@ -189,7 +189,7 @@ signed short Assembler::handleSymbol(std::string name, RelocationEntry::Type typ
 	Symbol& sym = symbolTable.at(name);
 	if (sym.type == Symbol::Type::ABSOLUT) return sym.value;
 	Section& sect = sectionTable.at(currentSection);
-	if (type == RelocationEntry::Type::R_386_32) {
+	if (type == RelocationEntry::Type::R_386_32 || type == RelocationEntry::Type::R_386_N32) {
 		if (sym.type == Symbol::Type::GLOBAL) {
 			sect.addRelocationEntry(locationCounter, type, sym.rb);
 			return 0;
@@ -258,8 +258,33 @@ void Assembler::handleDirective(Directive * dir,std::ofstream& out){
 		std::string param = dir->getParam();
 		if (name == "word" && locationCounter & 1) { out << "00 ";  locationCounter++; }// if word aligment is neccessary
 		short tmp = 0;
-		if (std::regex_search(param, Parser::tokenParsers.at("val"))) tmp = util::convertStringToDecimal(param);
-		else tmp = handleSymbol(param, RelocationEntry::Type::R_386_32);
+		if (std::regex_search(param, Parser::tokenParsers.at("expr"))) {
+			std::queue<std::string> tokens = util::tokenize(param, "+-");
+			std::queue<std::string> operations = util::tokenize(param, "0-9a-z");
+			
+			bool first = true;
+			while (!tokens.empty()) {
+				std::string token = tokens.front();
+				std::string operation;
+				tokens.pop();
+				if (first) {
+					operation = "+";
+					first = false;
+				}
+				else {
+					operation = operations.front();
+					operations.pop();
+				}
+				if (std::regex_search(token, Parser::tokenParsers.at("val"))) {
+					if(operation == "+") tmp += util::convertStringToDecimal(token);
+					else tmp -= util::convertStringToDecimal(token);
+				}
+				else if (std::regex_search(token, Parser::tokenParsers.at("symbol"))) {
+					if(operation == "+") tmp += handleSymbol(token, RelocationEntry::Type::R_386_32);
+					else tmp -= handleSymbol(token, RelocationEntry::Type::R_386_N32);
+				}
+			}
+		}
 		out << util::convertDecimalToString(tmp, name == "byte" ? true : false) << " ";
 		locationCounter += dir->getSize() - 1;
 	}

@@ -1,27 +1,37 @@
 
 #include "Lexer.h"
+#include "Parser.h"
+#include "AssemblerException.h"
+#include "Directive.h"
+#include "Instruction.h"
+#include "Assembler.h"
+#include "Util.h"
 #include <string>
 #include <iostream>
 #include <queue>
+#include <iomanip>
+#include <sstream>
+#include <fstream>
+#include <cstdint>
 
 using namespace std;
 int main() {
 
 	Lexer* lexer = Lexer::getLexer();
-	string testString1 = ".wor<d> !1!2?3'4";
-	string testString2 = "xchgw [sp],		0x1234";
-	string testString3 = "a: .skip 8";
-	queue<string>* res1 = lexer->tokenize(testString1);
-	queue<string>* res2 = lexer->tokenize(testString2);
-	queue<string>* res3 = lexer->tokenize(testString3);
-	while (!res2->empty()) {
-		cout << res2->front() << endl;
-		res2->pop();
+	string testString1 = ".global a,b,c,d,s,e";
+	string testString2 = "lopticeeee: .equ a,    23";
+	string testString3 = "a: push r3";
+
+	try {
+
+		Assembler asembler("input.txt","output.txt");
+		asembler.assemble();
+	}
+	catch (util::AssemblerException e) {
+		cerr << e << endl;
 	}
 
-	free(res1);
-	free(res2);
-	free(res3);
+
 	int x;
 	cin >> x;
 	return 0;
