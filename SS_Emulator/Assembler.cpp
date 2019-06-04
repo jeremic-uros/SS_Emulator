@@ -10,6 +10,7 @@
 #include <iomanip>
 #include <algorithm>
 #include <regex>
+#include <cstdint>
 
 void Assembler::firstRun(){
 	// Prepare files and tools
@@ -77,7 +78,7 @@ void Assembler::firstRun(){
 						parsedLine->setSize(size);
 					}
 				}
-				else if ( name == "word" && locationCounter & 1 )  parsedLine->setSize(3);
+				//else if ( name == "word" && locationCounter & 1 )  parsedLine->setSize(3);
 				locationCounter += size;
 			}
 
@@ -256,7 +257,7 @@ void Assembler::handleDirective(Directive * dir,std::ofstream& out){
 	}
 	else if (name == "byte" || name == "word") {
 		std::string param = dir->getParam();
-		if (name == "word" && locationCounter & 1) { out << "00 ";  locationCounter++; }// if word aligment is neccessary
+		//if (name == "word" && locationCounter & 1) { out << "00 ";  locationCounter++; }// if word aligment is neccessary
 		short tmp = 0;
 		if (std::regex_search(param, Parser::tokenParsers.at("expr"))) {
 			std::queue<std::string> tokens = util::tokenize(param, "+-");
@@ -410,6 +411,47 @@ void Assembler::formatedOutput(){
 
 }
 
+void Assembler::formatForLinker(){
+	std::ofstream out(outputFileName);
+	// section table
+	out << "#sectab" << std::endl;
+	for (auto const& sec : sectionTable)
+		out << sec.second << std::endl;
+	// symbol table
+	out << "#symtab" << std::endl;
+	for (auto const& sym : symbolTable) {
+		if (sym.first != "UND" && (sym.second.type == Symbol::Type::GLOBAL || sym.second.section == sym.second.rb)) {
+			out << sym.second << std::endl;
+		}
+	}
+	// ret tables
+	for (auto const& sec : sectionTable) {
+		if (sec.second.relocationTable) {
+			out << std::setw(10) << "#.ret" + sec.second.name << std::endl;
+			for (auto const& rel : *sec.second.relocationTable)
+				out << rel << std::endl;
+		}
+	}
+
+	// copy from second work file
+	std::ifstream in;
+	in.open(workFileNameSecondRun);
+	std::string line;
+	while (std::getline(in, line)) {
+		if (std::regex_search(line, std::regex("#.*")) || line == "") out << line << std::endl;
+		else {
+			std::queue<std::string> bytesHex = util::tokenize(line, " ");
+			while (!bytesHex.empty()) { // inefficent but works
+				uint8_t byte = util::convertStringToDecimal("0x" + bytesHex.front());
+				bytesHex.pop();
+				out << byte;
+			}
+		}
+	}
+	in.close();
+	out.close();
+}
+
 
 
 bool Assembler::assemble(){
@@ -422,7 +464,8 @@ bool Assembler::assemble(){
 
 		secondRun();
 
-		formatedOutput();
+		//formatedOutput();
+		formatForLinker(); 
 	}
 	catch (util::AssemblerException e) {
 		std::cout << e << std::endl;

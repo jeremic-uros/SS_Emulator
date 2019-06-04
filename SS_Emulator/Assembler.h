@@ -32,6 +32,7 @@ private:
 	void handleOperand(std::string field, unsigned char addr, unsigned char attr,std::ofstream& out);
 
 	void formatedOutput();
+	void formatForLinker();
 public:
 	Assembler(std::string in, std::string out) : inputFileName(in), outputFileName(out) {}
 	bool assemble();

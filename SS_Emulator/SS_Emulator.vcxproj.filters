@@ -9,55 +9,94 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
+    <Filter Include="Header Files\assembler_h">
+      <UniqueIdentifier>{dbd499cd-333b-4d5a-8992-0e9c1dc55690}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\assembler_cpp">
+      <UniqueIdentifier>{48af9873-b38d-43c1-b979-680f980fc690}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\linker_h">
+      <UniqueIdentifier>{96c6bc12-6d7c-42b5-abaf-70337cd9e9c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\linker_cpp">
+      <UniqueIdentifier>{bdcd423c-4298-466b-a5ef-1fa1d17ff3f0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Parser.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Assembler.cpp">
+      <Filter>Source Files\assembler_cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="Directive.cpp">
+      <Filter>Source Files\assembler_cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="Instruction.cpp">
+      <Filter>Source Files\assembler_cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="ParsedLine.cpp">
+      <Filter>Source Files\assembler_cpp</Filter>
     </ClCompile>
     <ClCompile Include="Lexer.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\assembler_cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="Parser.cpp">
+      <Filter>Source Files\assembler_cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="RelocationEntry.cpp">
+      <Filter>Source Files\assembler_cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="Section.cpp">
+      <Filter>Source Files\assembler_cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="Symbol.cpp">
+      <Filter>Source Files\assembler_cpp</Filter>
     </ClCompile>
     <ClCompile Include="Test.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\assembler_cpp</Filter>
     </ClCompile>
     <ClCompile Include="Util.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Assembler.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\assembler_cpp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Parser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Lexer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Instruction.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ParsedLine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AssemblerException.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Directive.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Util.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\assembler_h</Filter>
     </ClInclude>
     <ClInclude Include="Assembler.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\assembler_h</Filter>
+    </ClInclude>
+    <ClInclude Include="AssemblerException.h">
+      <Filter>Header Files\assembler_h</Filter>
+    </ClInclude>
+    <ClInclude Include="Directive.h">
+      <Filter>Header Files\assembler_h</Filter>
+    </ClInclude>
+    <ClInclude Include="Instruction.h">
+      <Filter>Header Files\assembler_h</Filter>
+    </ClInclude>
+    <ClInclude Include="Lexer.h">
+      <Filter>Header Files\assembler_h</Filter>
+    </ClInclude>
+    <ClInclude Include="ParsedLine.h">
+      <Filter>Header Files\assembler_h</Filter>
+    </ClInclude>
+    <ClInclude Include="Parser.h">
+      <Filter>Header Files\assembler_h</Filter>
+    </ClInclude>
+    <ClInclude Include="RelocationEntry.h">
+      <Filter>Header Files\assembler_h</Filter>
+    </ClInclude>
+    <ClInclude Include="Section.h">
+      <Filter>Header Files\assembler_h</Filter>
     </ClInclude>
     <ClInclude Include="Symbol.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\assembler_h</Filter>
+    </ClInclude>
+    <ClInclude Include="Linker.h">
+      <Filter>Header Files\linker_h</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
