@@ -133,6 +133,7 @@
     <ClCompile Include="Directive.cpp" />
     <ClCompile Include="Instruction.cpp" />
     <ClCompile Include="Lexer.cpp" />
+    <ClCompile Include="Linker.cpp" />
     <ClCompile Include="ParsedLine.cpp" />
     <ClCompile Include="RelocationEntry.cpp" />
     <ClCompile Include="Section.cpp" />

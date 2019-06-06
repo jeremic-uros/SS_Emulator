@@ -287,15 +287,12 @@ void Assembler::handleDirective(Directive * dir,std::ofstream& out){
 			}
 		}
 		out << util::convertDecimalToString(tmp, name == "byte" ? true : false) << " ";
-		locationCounter += dir->getSize() - 1;
 	}
 	else if (name == "align" || name == "skip") {
-		if (currentSection == ".bss" && name == "skip") out << util::convertDecimalToString(dir->getSize(),false) << " ";
-		else for (int i = 0; i < dir->getSize(); i++) out << "00 ";
+		if(currentSection != ".bss")
+			for (int i = 0; i < dir->getSize(); i++) out << "00 ";
 	}
-	else {
-		locationCounter += dir->getSize();
-	}
+	locationCounter += dir->getSize();
 }
 
 void Assembler::handleOperand(std::string field, unsigned char addr, unsigned char attr,std::ofstream& out){

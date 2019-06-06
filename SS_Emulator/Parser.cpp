@@ -143,6 +143,8 @@ void Parser::parseInstructionOperands(std::queue<std::string>* tokens, Instructi
 				token.pop_back();
 			}
 			field = token;
+			if (field == "sp") { field = "r6"; }
+			if (field == "pc") { field = "r7"; }
 			addr = Instruction::addressingCodes.at("regdir");
 			instructionSize -= (instAttr & 1) + 1; // only one byte used for operand
 		}
