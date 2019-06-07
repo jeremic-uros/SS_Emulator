@@ -228,10 +228,13 @@ void Assembler::handleInstruction(Instruction* inst,std::ofstream& out){
 	for (int i = 0; i < Instruction::numOfOperands.at(inst->getName()); i++) {
 		if (i == 0) { // first operand
 			handleOperand(inst->getFirstOprField(), inst->getFirstOprAddr(), instAttr , out);
+			
 		}
 		else { // second operand
 			handleOperand(inst->getSecondOprField(), inst->getSecondOprAddr(), instAttr | 16, out); // 5 bit of instAttr used to specify that it is the second opr
 		}
+
+		if (inst->getFirstOprAddr() == Instruction::AddrCodes::REGINX8 || inst->getSecondOprAddr() == Instruction::AddrCodes::REGINX8) inst->setSize(inst->getSize() - 1);
 	}
 }
 
@@ -322,6 +325,16 @@ void Assembler::handleOperand(std::string field, unsigned char addr, unsigned ch
 		out << util::convertDecimalToString(oprDescr, true) << " ";
 		locationCounter++;
 		break;
+	case Instruction::AddrCodes::REGINX8:
+		reg = util::convertStringToDecimal(field.substr(1, 1)) << 1;
+		oprDescr |= reg;
+		field = field.substr(3, field.npos);
+		val = util::convertStringToDecimal(field);
+		out << util::convertDecimalToString(oprDescr, true) << " ";
+		out << util::convertDecimalToString(val, true) << " ";
+		locationCounter += (val >> 2);
+		
+		break;
 	case Instruction::AddrCodes::REGINX16:
 		if (attr & 8) {
 			reg = 7 << 1; // PC = R7
@@ -336,16 +349,10 @@ void Assembler::handleOperand(std::string field, unsigned char addr, unsigned ch
 			oprDescr |= reg;
 			field = field.substr(3, field.npos);
 			if (std::regex_search(field, Parser::tokenParsers.at("val"))) {
-				val = util::convertStringToDecimal(field);
-				if (!(val >> 8)) {
-					addr = Instruction::AddrCodes::REGINX8;
-					oprDescr = addr << 5;
-					oprDescr |= reg;
-				}
-				
+				val = util::convertStringToDecimal(field);			
 				out << util::convertDecimalToString(oprDescr,true) << " ";
-				out << util::convertDecimalToString(val, val >> 8 ? false : true) << " ";
-				locationCounter += (val >> 8 ? 3 : 2);
+				out << util::convertDecimalToString(val,false) << " ";
+				locationCounter += (val >> 3);
 			}
 			else {
 				out << util::convertDecimalToString(oprDescr, true) << " ";

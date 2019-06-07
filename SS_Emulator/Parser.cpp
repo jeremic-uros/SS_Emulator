@@ -116,7 +116,7 @@ std::string Parser::parseInstructionName(std::string token, unsigned char & inst
 
 void Parser::parseInstructionOperands(std::queue<std::string>* tokens, Instruction * inst){
 	unsigned char tokensToProcess = Instruction::numOfOperands.at(inst->getName());
-	unsigned char instructionSize = 1 + tokensToProcess * ((inst->getOperandAttributes() & 1) + 2); // InstDescr + numOfOperands * (OprDesr+operandSize)
+	unsigned char instructionSize = 1 + tokensToProcess * 3; // InstDescr + numOfOperands * (OprDesr+2 bytes for field)
 	if (tokensToProcess == 2) tokensToProcess++;
 	if (tokens->size() != tokensToProcess) throw util::AssemblerException("PARSING ERROR: To many or to few tokens");
 	
@@ -146,20 +146,25 @@ void Parser::parseInstructionOperands(std::queue<std::string>* tokens, Instructi
 			if (field == "sp") { field = "r6"; }
 			if (field == "pc") { field = "r7"; }
 			addr = Instruction::addressingCodes.at("regdir");
-			instructionSize -= (instAttr & 1) + 1; // only one byte used for operand
+			instructionSize -= 2; // only one byte used for operand
 		}
 		else if (std::regex_search(token, tokenParsers.at("regin"))) {
 			field = token.substr(1, 2);
 			if (field == "sp") { field = "r6"; }
 			if (field == "pc") { field = "r7"; }
 			addr = Instruction::addressingCodes.at("regin");
-			instructionSize -= (inst->getOperandAttributes() & 1) + 1; // only one byte used for operand
+			instructionSize -= 2; // only one byte used for operand
 		}
 		else if (std::regex_search(token, tokenParsers.at("reginx"))) {
 			token.pop_back();
 			std::string comma = ",";
 			field = token.replace((size_t)2,(size_t)1,comma);
-			addr = Instruction::addressingCodes.at("reginx16"); // if displacment param can be stored in a byte its on assembler to change this
+			if(util::convertStringToDecimal(field.substr(3, field.npos)) >> 8 ) addr = Instruction::addressingCodes.at("reginx16");
+			else {
+				addr = Instruction::addressingCodes.at("reginx8");
+				instructionSize--;
+			}
+			 
 		}
 		else if (std::regex_search(token, tokenParsers.at("val"))) {
 			field = token;
