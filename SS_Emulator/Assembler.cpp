@@ -428,14 +428,6 @@ void Assembler::formatForLinker(){
 			out << sym.second << std::endl;
 		}
 	}
-	// ret tables
-	for (auto const& sec : sectionTable) {
-		if (sec.second.relocationTable) {
-			out << std::setw(10) << "#.ret" + sec.second.name << std::endl;
-			for (auto const& rel : *sec.second.relocationTable)
-				out << rel << std::endl;
-		}
-	}
 
 	// copy from second work file
 	std::ifstream in;
@@ -450,6 +442,16 @@ void Assembler::formatForLinker(){
 				bytesHex.pop();
 				out << byte;
 			}
+		}
+	}
+	out << std::endl; // seperate data from ret tables
+
+	// ret tables
+	for (auto const& sec : sectionTable) {
+		if (sec.second.relocationTable) {
+			out << std::setw(10) << "#.ret" + sec.second.name << std::endl;
+			for (auto const& rel : *sec.second.relocationTable)
+				out << rel << std::endl;
 		}
 	}
 	in.close();
