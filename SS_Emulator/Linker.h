@@ -13,6 +13,7 @@ private:
 	uint16_t symbolCounter;
 	std::string* fileNames;
 	uint8_t numOfFiles;
+	std::string outputFile;
 
 	std::unordered_map<std::string, Symbol> symbolTable;
 	std::unordered_map<std::string,Section> sectionTable;
@@ -21,7 +22,7 @@ private:
 	std::unordered_map<std::string, uint16_t> sectionLocationCounterTable;
 	uint8_t* sectionData;
 	// only one global relocation table with run time addrs
-	std::list<RelocationEntry> relocationTable; 
+	//std::list<RelocationEntry> relocationTable; 
 	
 	// Collects symbols and sections from all files 
 	void firstPass();
@@ -30,12 +31,14 @@ private:
 	void loadSectionAndSymbolTable(std::ifstream& in);
 	void addSections(); // adds sections if they dont exist otherwise updates section size
 	void addSymbols(); // adds and updates values symbols from currentSymbolTable to symbolTable
-	void updateSectionLocationCounters();
+	void updateSectionLocationCounters(); // adds the size of current file section to the counter
 
 	void loadSectionData(std::ifstream & in);
 	void loadRetTablesAndFix(std::ifstream& in);
+
+	void output();
 public:
-	Linker(std::string* files,uint8_t num) : fileNames(files),numOfFiles(num), symbolCounter(1) {}
+	Linker(std::string* files,uint8_t num,std::string output) : fileNames(files),numOfFiles(num),outputFile(output) ,symbolCounter(1) {}
 
 	void link();
 

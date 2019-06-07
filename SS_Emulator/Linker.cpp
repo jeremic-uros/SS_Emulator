@@ -64,19 +64,6 @@ void Linker::secondPass(){
 	for (int i = 0; i < numOfFiles; i++) {
 		in.open(fileNames[i]);
 		loadSectionAndSymbolTable(in);
-
-		/* 
-			last line read was #rel,
-			returing 50 chars back
-			and eating up the data too #rel line
-			so that loadRelTables can work
-		
-		std::streampos pos = in.tellg();
-		pos -= 50; 
-		in.seekg(pos);
-		std::string ln;
-		std::getline(in, ln);*/
-
 		loadSectionData(in);
 		loadRetTablesAndFix(in);
 		updateSectionLocationCounters();
@@ -224,7 +211,7 @@ void Linker::loadRetTablesAndFix(std::ifstream & in) {
 			if (currentSymbolTable.at(oldSymReff).section != 0 || 
 				symbol.section != sectionTable.at(sectName).rb ||
 				type != RelocationEntry::Type::R_386_PC32){ 
-				relocationTable.push_back({ RelocationEntry(newOffset,type,symbol.section) }); // add to global ret table
+				sect.addRelocationEntry(newOffset, type, symbol.section);
 			}
 
 			// fix data
@@ -252,6 +239,41 @@ void Linker::loadRetTablesAndFix(std::ifstream & in) {
 	}
 }
 
+void Linker::output(){
+	std::ofstream out(outputFile);
+	
+	// section table
+	uint16_t size = 0;
+	out << "#sectab" << std::endl;
+	for (auto const& sec : sectionTable) {
+		if (sec.first != ".bss") size += sec.second.size;
+		out << sec.second << std::endl;
+	}
+	// symbol table
+	out << "#symtab" << std::endl;
+	for (auto const& sym : symbolTable) 
+		if (sym.second.section == sym.second.rb) 
+			out << sym.second << std::endl;
+
+	out << std::endl;
+	// data 
+	out.write((char*)sectionData, size);
+
+	out << std::endl;
+
+
+	// ret tables
+	for (auto const& sec : sectionTable) {
+		if (sec.second.relocationTable) {
+			out << "#.ret" + sec.second.name << std::endl;
+			for (auto const& rel : *sec.second.relocationTable)
+				out << rel << std::endl;
+		}
+	}
+
+	out.close();
+}
+
 
 void Linker::link(){
 
@@ -259,17 +281,7 @@ void Linker::link(){
 
 	secondPass();
 
-	
-	uint16_t size = 0;
-	for (auto sect : sectionTable) {
-		if (sect.first != ".bss") {
-			size += sect.second.size;
-		}
-	}
-
-	for (int i = 0; i < size; i++)
-		std::cout << util::convertDecimalToString(sectionData[i], true) << " ";
-
+	output();
 
 	// free allocated space for section data
 	delete sectionData;
