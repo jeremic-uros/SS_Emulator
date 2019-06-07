@@ -9,12 +9,11 @@ public:
 		R_386_PC32 = 1,
 		R_386_N32 = 2
 	};
-private:
 	unsigned short offset;
 	Type type;
 	unsigned short symbol;
 	// flags 
-public:
+
 	RelocationEntry (unsigned short offs, Type typ, unsigned short sym) : offset(offs), type(typ), symbol(sym) {}
 
 	unsigned short getOffset() const { return offset; }

@@ -1,6 +1,7 @@
 #include "Linker.h"
 #include "Util.h"
 #include "Section.h"
+#include "RelocationEntry.h"
 #include "Symbol.h"
 #include <string>
 #include <iostream>
@@ -44,6 +45,43 @@ void Linker::firstPass(){
 }
 
 void Linker::secondPass(){
+	std::ifstream in;
+
+	// set section Location Counters to section start values
+	for (auto& cnt : sectionLocationCounterTable)
+		cnt.second = symbolTable.at(cnt.first).value;
+
+
+	// allocate data array
+	uint16_t size = 0;
+	for (auto sect : sectionTable) {
+		if (sect.first != ".bss") {
+			size += sect.second.size;
+		}
+	}
+	sectionData = new uint8_t[size];
+
+	for (int i = 0; i < numOfFiles; i++) {
+		in.open(fileNames[i]);
+		loadSectionAndSymbolTable(in);
+
+		/* 
+			last line read was #rel,
+			returing 50 chars back
+			and eating up the data too #rel line
+			so that loadRelTables can work
+		
+		std::streampos pos = in.tellg();
+		pos -= 50; 
+		in.seekg(pos);
+		std::string ln;
+		std::getline(in, ln);*/
+
+		loadSectionData(in);
+		loadRetTablesAndFix(in);
+		updateSectionLocationCounters();
+		in.close();
+	}
 }
 
 void Linker::loadSectionAndSymbolTable(std::ifstream & in){
@@ -139,15 +177,100 @@ void Linker::updateSectionLocationCounters(){
 }
 
 
-void Linker::loadRelTables(std::ifstream & in){
+void Linker::loadSectionData(std::ifstream & in){
+	// file position should be at the begining of section data 
+	// read section data
+	std::string line;
+	uint16_t locCounter = 0;
+	while (std::getline(in, line) && std::regex_search(line, std::regex("#\\.[a-z]+"))) {
+		std::string sectName = line.substr(1, line.npos);
+		if (sectName != ".bss") {
+			uint16_t size = currentSectionTable.at(sectName).size;
+			uint8_t offset = sectionLocationCounterTable.at(sectName);
+			in.read((char*)(sectionData + offset), size);
+		}
+	}
 }
 
-void Linker::fixRelTablesReffrences()
-{
+void Linker::loadRetTablesAndFix(std::ifstream & in) {
+	std::string line;
+	std::getline(in, line); // line should be a #.rel table
+
+	// read ret tables
+	while (1) {
+		if(!std::regex_search(line,std::regex("#\\.ret.+"))) break; // end of ret tables 
+		std::string sectName = line.substr(5, sectName.npos);
+		Section& sect = sectionTable.at(sectName);
+
+		while (std::getline(in, line) && std::regex_search(line, std::regex(".*[0-9]+.*(R_386_32|R_386_N32|R_386_PC32).*[0-9]+.*"))) {
+			std::queue<std::string> tokens = util::tokenize(line, " ");
+			// get RetEntry data from line
+			uint16_t oldOffset = util::convertStringToDecimal(tokens.front());
+			tokens.pop();
+			RelocationEntry::Type type;
+			std::string typ = tokens.front();
+			if (typ == "R_386_32") type = RelocationEntry::Type::R_386_32;
+			else if (typ == "R_386_PC32") type = RelocationEntry::Type::R_386_PC32;
+			else type = RelocationEntry::Type::R_386_N32;
+			tokens.pop();
+			uint16_t oldSymReff = util::convertStringToDecimal(tokens.front());
+
+			// get reffrenced symbol from sym table
+			std::string symName = currentSymbolTable.at(oldSymReff).name;
+			Symbol& symbol = symbolTable.at(symName);
+			uint16_t newOffset = oldOffset + sectionLocationCounterTable.at(sectName); // oldOffset + run time start address of the section
+
+			// no need for reallocating if a undefined symbol is now defined in the same section and adr type is PC REl
+			if (currentSymbolTable.at(oldSymReff).section != 0 || 
+				symbol.section != sectionTable.at(sectName).rb ||
+				type != RelocationEntry::Type::R_386_PC32){ 
+				relocationTable.push_back({ RelocationEntry(newOffset,type,symbol.section) }); // add to global ret table
+			}
+
+			// fix data
+			int16_t oldVal = ((uint16_t)sectionData[newOffset + 1]) << 8 | sectionData[newOffset];
+			int16_t newVal = 0;
+			if (symbol.rb == symbol.section) newVal = sectionLocationCounterTable.at(sectName);
+			else newVal = symbol.value;
+			switch (type) {
+			case RelocationEntry::R_386_32:
+				newVal = oldVal + newVal;
+				break;
+			case RelocationEntry::R_386_PC32:
+				newVal = oldVal + newVal - newOffset;
+				break;
+			case RelocationEntry::R_386_N32:
+				newVal = oldVal - newVal;
+				break;
+			default:
+				break;
+			}
+
+			sectionData[newOffset] = newVal & 0xFF;
+			sectionData[newOffset + 1] = newVal >> 8;
+		}
+	}
 }
+
 
 void Linker::link(){
 
 	firstPass();
 
+	secondPass();
+
+	
+	uint16_t size = 0;
+	for (auto sect : sectionTable) {
+		if (sect.first != ".bss") {
+			size += sect.second.size;
+		}
+	}
+
+	for (int i = 0; i < size; i++)
+		std::cout << util::convertDecimalToString(sectionData[i], true) << " ";
+
+
+	// free allocated space for section data
+	delete sectionData;
 }

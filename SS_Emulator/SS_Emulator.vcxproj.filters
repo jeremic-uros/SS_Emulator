@@ -61,7 +61,7 @@
       <Filter>Source Files\assembler_cpp</Filter>
     </ClCompile>
     <ClCompile Include="Linker.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\linker_cpp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

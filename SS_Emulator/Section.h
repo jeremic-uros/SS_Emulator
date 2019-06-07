@@ -12,7 +12,7 @@ public:
 	std::list<RelocationEntry>* relocationTable = nullptr;
 
 	Section(std::string nam, unsigned short sz,unsigned short rbb ) : name(nam), size(sz), rb(rbb) {}
-	~Section() { if (relocationTable) free(relocationTable); }
+	~Section() { if (relocationTable) delete(relocationTable); }
 
 	std::string getName() const { return name; }
 	void setName(std::string nam) { name = nam; }
