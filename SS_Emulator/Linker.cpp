@@ -217,7 +217,7 @@ void Linker::loadRetTablesAndFix(std::ifstream & in) {
 			// fix data
 			int16_t oldVal = ((uint16_t)sectionData[newOffset + 1]) << 8 | sectionData[newOffset];
 			int16_t newVal = 0;
-			if (symbol.rb == symbol.section) newVal = sectionLocationCounterTable.at(sectName);
+			if (symbol.rb == symbol.section) newVal = sectionLocationCounterTable.at(symbol.name);
 			else newVal = symbol.value;
 			switch (type) {
 			case RelocationEntry::R_386_32:
@@ -272,6 +272,10 @@ void Linker::output(){
 	}
 
 	out.close();
+
+	for (int i = 0; i < size; i++) {
+		std::cout << util::convertDecimalToString(sectionData[i], true) << " ";
+	}
 }
 
 

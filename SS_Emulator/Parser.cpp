@@ -169,6 +169,7 @@ void Parser::parseInstructionOperands(std::queue<std::string>* tokens, Instructi
 		else if (std::regex_search(token, tokenParsers.at("val"))) {
 			field = token;
 			addr = Instruction::addressingCodes.at("imm");
+			if (!(inst->getOperandAttributes() & 1)) instructionSize--;
 		}
 		else if (std::regex_search(token, tokenParsers.at("symbol"))) {
 			field = token;

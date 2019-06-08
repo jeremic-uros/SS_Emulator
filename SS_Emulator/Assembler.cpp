@@ -461,7 +461,6 @@ void Assembler::formatForLinker(){
 
 
 bool Assembler::assemble(){
-	try {
 		Symbol und("UND", 0, 0, Symbol::Type::LOCAL, 0);
 		std::string undefined = "UND";
 		symbolTable.insert({ undefined,und });
@@ -472,9 +471,5 @@ bool Assembler::assemble(){
 
 		//formatedOutput();
 		formatForLinker(); 
-	}
-	catch (util::AssemblerException e) {
-		std::cout << e << std::endl;
-	}
-	return false;
+	return true;
 }
