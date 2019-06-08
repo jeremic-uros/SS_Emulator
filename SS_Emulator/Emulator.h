@@ -8,16 +8,17 @@ class Program;
 
 class Emulator {
 private:
-	static const size_t MEM_SIZE = 2 ^ 16;
+	static const size_t MEM_SIZE = 0x10000;
 	static const uint8_t NUMBER_OF_REGISTERS = 8;
 	static const size_t STACK_SIZE = 2 ^ 11; 
 	static const size_t STACK_START = 0xFF00; // points to last occupied slot and goes down
 	static const size_t MAPPED_REG_START = 0xFF00;
 	static const size_t IVTP = 0x0000;
 	static const size_t IVT_SIZE = 2 * 8;
+	
+	Program* program;
 
-
-	uint8_t memory[MEM_SIZE];
+	uint8_t* memory;
 	struct {
 		int16_t R1;
 		int16_t R2;
@@ -56,8 +57,8 @@ private:
 
 	friend class Program;
 public:
-	Emulator() {}
-
+	Emulator();
+	~Emulator();
 	
 	void emulate(std::string filePath);
 
