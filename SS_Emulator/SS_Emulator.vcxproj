@@ -117,12 +117,14 @@
   <ItemGroup>
     <ClInclude Include="Assembler.h" />
     <ClInclude Include="Directive.h" />
+    <ClInclude Include="Emulator.h" />
     <ClInclude Include="Instruction.h" />
     <ClInclude Include="Lexer.h" />
     <ClInclude Include="Linker.h" />
     <ClInclude Include="ParsedLine.h" />
     <ClInclude Include="Parser.h" />
     <ClInclude Include="AssemblerException.h" />
+    <ClInclude Include="Program.h" />
     <ClInclude Include="RelocationEntry.h" />
     <ClInclude Include="Section.h" />
     <ClInclude Include="Symbol.h" />
@@ -131,10 +133,12 @@
   <ItemGroup>
     <ClCompile Include="Assembler.cpp" />
     <ClCompile Include="Directive.cpp" />
+    <ClCompile Include="Emulator.cpp" />
     <ClCompile Include="Instruction.cpp" />
     <ClCompile Include="Lexer.cpp" />
     <ClCompile Include="Linker.cpp" />
     <ClCompile Include="ParsedLine.cpp" />
+    <ClCompile Include="Program.cpp" />
     <ClCompile Include="RelocationEntry.cpp" />
     <ClCompile Include="Section.cpp" />
     <ClCompile Include="Symbol.cpp" />

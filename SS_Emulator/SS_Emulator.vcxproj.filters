@@ -25,6 +25,12 @@
     <Filter Include="Source Files\linker_cpp">
       <UniqueIdentifier>{bdcd423c-4298-466b-a5ef-1fa1d17ff3f0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\emulator_h">
+      <UniqueIdentifier>{b360cb33-e174-4395-9a5f-e18d9566b8fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\emulator_cpp">
+      <UniqueIdentifier>{aba4af0e-f970-449c-b7d9-d2e4f091a1ab}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Assembler.cpp">
@@ -63,6 +69,12 @@
     <ClCompile Include="Linker.cpp">
       <Filter>Source Files\linker_cpp</Filter>
     </ClCompile>
+    <ClCompile Include="Emulator.cpp">
+      <Filter>Source Files\emulator_cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="Program.cpp">
+      <Filter>Source Files\emulator_cpp</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Util.h">
@@ -100,6 +112,12 @@
     </ClInclude>
     <ClInclude Include="Linker.h">
       <Filter>Header Files\linker_h</Filter>
+    </ClInclude>
+    <ClInclude Include="Emulator.h">
+      <Filter>Header Files\emulator_h</Filter>
+    </ClInclude>
+    <ClInclude Include="Program.h">
+      <Filter>Header Files\emulator_h</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
