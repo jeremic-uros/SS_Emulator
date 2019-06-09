@@ -6,6 +6,7 @@
 #include "Instruction.h"
 #include "Linker.h"
 #include "Assembler.h"
+#include "Emulator.h"
 #include "Util.h"
 #include <string>
 #include <iostream>
@@ -21,33 +22,20 @@ int main() {
 
 	try {
 
-		//Assembler asembler("input1.txt","output1.o");
-		//asembler.assemble();
+		Assembler asembler("input.txt","output.o");
+		asembler.assemble();
+		Assembler asembler1("input1.txt", "output1.o");
+		asembler1.assemble();
+
 
 		std::string * fileNames = new std::string[2];
 		fileNames[0] = "output.o";
 		fileNames[1] = "output1.o";
-		Linker linker(fileNames,2);
+		Linker linker(fileNames,2,"out.exec");
 		linker.link();
-		/*ifstream in("output.o");
-		string line;
-		while (getline(in, line) && line != "#.data"){}
-		uint8_t bytes[3];
-		in.read((char*)bytes, 3);
-		getline(in, line);
-		uint8_t bytes2[32];
-		in.read((char*)bytes2, 32);
-		getline(in, line);
-		uint8_t bytes3[13];
-		in.read((char*)bytes3, 13);
-		getline(in, line);
-		uint16_t bss = 0;
-		uint8_t bytes4[2];
-		in.read((char*)bytes4, 2);
-		bss =  bytes4[1] << 8 | bytes4[0];
-		cout << bss;
 
-		in.close();*/
+		Emulator emulator;
+		emulator.emulate("out.exec");
 	}
 	catch (util::AssemblerException e) {
 		cerr << e << endl;

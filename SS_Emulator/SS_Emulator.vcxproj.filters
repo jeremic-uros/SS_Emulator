@@ -31,6 +31,12 @@
     <Filter Include="Source Files\emulator_cpp">
       <UniqueIdentifier>{aba4af0e-f970-449c-b7d9-d2e4f091a1ab}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\common">
+      <UniqueIdentifier>{23e3213b-f803-4fad-9450-55637ef01441}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\common">
+      <UniqueIdentifier>{01f2b5f1-4833-4332-98e4-5d705bcb6d80}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Assembler.cpp">
@@ -75,6 +81,9 @@
     <ClCompile Include="Program.cpp">
       <Filter>Source Files\emulator_cpp</Filter>
     </ClCompile>
+    <ClCompile Include="ObjectFileReader.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Util.h">
@@ -118,6 +127,9 @@
     </ClInclude>
     <ClInclude Include="Program.h">
       <Filter>Header Files\emulator_h</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectFileReader.h">
+      <Filter>Header Files\common</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

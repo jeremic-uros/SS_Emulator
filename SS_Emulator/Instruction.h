@@ -46,6 +46,37 @@ public:
 
 	static std::unordered_map<std::string, unsigned char> instructionCodes;
 
+	
+
+	enum InstrCodes {
+		HALT = 1,
+		INT = 2,
+		XCHG = 3,
+		MOV = 4,
+		ADD = 5,
+		SUB = 6,
+		MUL = 7,
+		DIV = 8,
+		CMP = 9,
+		NOT = 10,
+		AND = 11,
+		OR = 12,
+		XOR = 13,
+		TEST = 14,
+		SHL = 15,
+		SHR = 16,
+		PUSH = 17,
+		POP = 18,
+		JMP = 19,
+		JEQ = 20,
+		JNE = 21,
+		JGT = 22,
+		CALL = 23,
+		RET = 24,
+		IRET = 25,
+	};
+
+	static std::unordered_map<Instruction::InstrCodes, std::string> instructionNames;
 	// possiblly refactoring needed
 	static std::unordered_map<std::string, unsigned char> addressingCodes;
 

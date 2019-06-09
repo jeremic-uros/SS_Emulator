@@ -121,6 +121,7 @@
     <ClInclude Include="Instruction.h" />
     <ClInclude Include="Lexer.h" />
     <ClInclude Include="Linker.h" />
+    <ClInclude Include="ObjectFileReader.h" />
     <ClInclude Include="ParsedLine.h" />
     <ClInclude Include="Parser.h" />
     <ClInclude Include="AssemblerException.h" />
@@ -137,6 +138,7 @@
     <ClCompile Include="Instruction.cpp" />
     <ClCompile Include="Lexer.cpp" />
     <ClCompile Include="Linker.cpp" />
+    <ClCompile Include="ObjectFileReader.cpp" />
     <ClCompile Include="ParsedLine.cpp" />
     <ClCompile Include="Program.cpp" />
     <ClCompile Include="RelocationEntry.cpp" />

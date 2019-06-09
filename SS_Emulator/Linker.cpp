@@ -242,9 +242,6 @@ void Linker::output(){
 
 	out.close();
 
-	for (int i = 0; i < size; i++) {
-		std::cout << util::convertDecimalToString(sectionData[i], true) << " ";
-	}
 }
 
 
