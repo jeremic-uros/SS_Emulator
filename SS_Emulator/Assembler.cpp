@@ -458,8 +458,6 @@ void Assembler::formatForLinker(){
 	out.close();
 }
 
-
-
 bool Assembler::assemble(){
 		Symbol und("UND", 0, 0, Symbol::Type::LOCAL, 0);
 		std::string undefined = "UND";

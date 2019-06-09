@@ -67,6 +67,33 @@ std::unordered_map<std::string, unsigned char> Instruction::numOfOperands = {
 		{"iret", 0},
 };
 
+std::unordered_map<Instruction::InstrCodes, std::string> Instruction::instructionNames = {
+		{ HALT, "halt"},
+		{ XCHG, "xchg"},
+		{ INT, "int"},
+		{ MOV, "mov"},
+		{ ADD, "add"},
+		{ SUB, "sub"},
+		{ MUL, "mul"},
+		{ DIV, "div"},
+		{ CMP, "cmp"},
+		{ NOT , "not"},
+		{ AND , "and"},
+		{ OR , "or"},
+		{ XOR , "xor"},
+		{ TEST , "test"},
+		{ SHL , "shl"},
+		{ SHR , "shr"},
+		{ PUSH , "push"},
+		{ POP , "pop"},
+		{ JMP , "jmp"},
+		{ JEQ , "jeq"},
+		{ JNE , "jne"},
+		{ JGT , "jgt"},
+		{ CALL , "call"},
+		{ RET , "ret"},
+		{ IRET , "iret"},
+};
 void Instruction::write(std::ostream & it) const {
 	ParsedLine::write(it);
 	it << (int)operandAttributes << delimiter << "fOpr=" + firstOprField << delimiter << (int)firstOprAddr << delimiter << "sOpr=" + secondOprField << delimiter << (int)secondOprAddr << delimiter;

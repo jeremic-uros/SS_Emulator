@@ -20,6 +20,7 @@ private:
 
 	uint8_t* memory;
 	struct {
+		int16_t R0;
 		int16_t R1;
 		int16_t R2;
 		int16_t R3;
@@ -48,10 +49,14 @@ private:
 	int16_t regRead(uint8_t ind);
 	
 	void memWrite(uint8_t val, size_t off);
+	void memWriteWord(uint16_t val, size_t off);
 	uint8_t memRead(size_t off);
+	uint16_t memReadWord(size_t off);
 
 	void stackPush(uint8_t val);
+	void stackPushWord(uint16_t val);
 	int8_t stackPop();
+	int16_t stackPopWord();
 
 	void loadProgramFromFile(std::string filePath);
 

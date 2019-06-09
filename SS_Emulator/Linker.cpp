@@ -3,6 +3,7 @@
 #include "Section.h"
 #include "RelocationEntry.h"
 #include "Symbol.h"
+#include "ObjectFileReader.h"
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -76,40 +77,8 @@ void Linker::loadSectionAndSymbolTable(std::ifstream & in){
 	currentSectionTable.clear();
 	currentSymbolTable.clear();
 
-	// load section table
-	std::string line;
-	while (std::getline(in, line) && line != "#sectab") {}
-	if (line == "#sectab") {
-		while (std::getline(in, line) && std::regex_search(line, std::regex(".*\\.[a-z]+.*[0-9]+.*[0-9]+"))) {
-			std::queue<std::string> tokens = util::tokenize(line, " ");
-			std::string name = tokens.front();
-			tokens.pop();
-			uint16_t size = util::convertStringToDecimal(tokens.front());
-			tokens.pop();
-			uint8_t rb = util::convertStringToDecimal(tokens.front());
-			currentSectionTable.insert({ name ,Section(name, size, rb) });
-		}
-	}
-	else {} // throw bad file format exception TO:DO
-
-	// load symbol table
-	if (line == "#symtab") {
-		while (std::getline(in, line) && std::regex_search(line, std::regex(".*[a-z]+.*[0-9]+.*[0-9]+.*(LOCAL|GLOBAL).*[0-9]+"))) {
-			std::queue<std::string> tokens = util::tokenize(line, " ");
-			std::string name = tokens.front();
-			tokens.pop();
-			uint16_t section = util::convertStringToDecimal(tokens.front());
-			tokens.pop();
-			uint16_t val = util::convertStringToDecimal(tokens.front());
-			tokens.pop();
-			std::string type = tokens.front();
-			tokens.pop();
-			uint16_t rb = util::convertStringToDecimal(tokens.front());
-			currentSymbolTable.insert({ rb, Symbol(name,section,val,(type == "GLOBAL" ? Symbol::Type::GLOBAL : Symbol::Type::LOCAL),rb) });
-		}
-	}
-	else {} // throw bad file format exception TO:DO
-
+	// load section and symbol table
+	ObjectFileReader::readSymbolandSectionTable(currentSymbolTable, currentSectionTable, in);
 }
 
 void Linker::addSections(){
