@@ -177,6 +177,16 @@ void Program::execute(){
 
 
 
+Program::Program(const Program & prog) : emulator(prog.emulator){
+
+}
+
+Program & Program::operator=(const Program & emu)
+{
+
+	return *this;
+}
+
 void Program::run() {
 	running = true;
 	while (running) {
@@ -211,7 +221,7 @@ void Program::XCHG_EXECUTOR(){
 void Program::INT_EXECUTOR(){
 	emulator.stackPushWord(emulator.registers.PC);
 	emulator.stackPushWord(emulator.PSW.val);
-	emulator.registers.PC = emulator.memory[decodeVal(opr1Descr, opr1Val) % 8 * 2];
+	emulator.registers.PC = emulator.memRead((decodeVal(opr1Descr, opr1Val) % 8) * 2);
 }
 
 void Program::MOV_EXECUTOR(){

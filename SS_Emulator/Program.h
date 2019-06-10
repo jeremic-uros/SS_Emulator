@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <string>
 #include <unordered_map>
-#include <functional>
 
 
 class Emulator;
@@ -63,6 +62,9 @@ private:
 public:
 	Program(Emulator& emu) : emulator(emu) {}
 	~Program() {}
+	Program(const Program& emu);
+
+	Program& operator= (const Program& emu);
 
 	void run(); 
 

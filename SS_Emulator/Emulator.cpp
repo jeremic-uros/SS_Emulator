@@ -144,20 +144,41 @@ void Emulator::loadProgramFromFile(std::string filePath){
 	memcpy(memory, data, size);
 
 
-	for (int i = 0; i < size; i++)
+	for (int i = 0; i < size; i++) {
 		std::cout << util::convertDecimalToString(memory[i], true) << " ";
-	delete data;
+	}
+	delete[] data;
 
 	in.close();
 }
 
 Emulator::Emulator(){
-	memory = new uint8_t[MEM_SIZE];
+	//memory = new uint8_t[MEM_SIZE];
 }
 
 Emulator::~Emulator(){
 	delete program;
-	delete memory;
+	//delete[] memory;
+}
+
+Emulator::Emulator(const Emulator & emu){
+
+	program = new Program(*emu.program);
+	/*memory = new uint8_t[MEM_SIZE];
+	for(int i = 0 ; i < MEM_SIZE ; i++) {
+		memory[i] = emu.memory[i];
+	}*/
+}
+
+Emulator & Emulator::operator=(const Emulator & emu) {
+	delete program;
+	program = new Program(*emu.program);
+	/*delete[] memory;
+	memory = new uint8_t[MEM_SIZE];
+	for (int i = 0; i < MEM_SIZE; i++) {
+		memory[i] = emu.memory[i];
+	}*/
+	return *this;
 }
 
 void Emulator::emulate(std::string filePath){

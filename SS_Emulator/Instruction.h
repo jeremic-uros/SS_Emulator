@@ -50,8 +50,8 @@ public:
 
 	enum InstrCodes {
 		HALT = 1,
-		INT = 2,
-		XCHG = 3,
+		XCHG = 2,
+		INT = 3,
 		MOV = 4,
 		ADD = 5,
 		SUB = 6,

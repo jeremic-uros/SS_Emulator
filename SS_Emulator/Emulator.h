@@ -18,7 +18,7 @@ private:
 	
 	Program* program;
 
-	uint8_t* memory;
+	uint8_t memory[MEM_SIZE]; // JEBACU TI MATER
 	struct {
 		int16_t R0;
 		int16_t R1;
@@ -64,6 +64,9 @@ private:
 public:
 	Emulator();
 	~Emulator();
+	Emulator(const Emulator& emu);
+
+	Emulator& operator= (const Emulator& emu);
 	
 	void emulate(std::string filePath);
 
