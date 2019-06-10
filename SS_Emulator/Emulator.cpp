@@ -8,6 +8,7 @@
 #include <iostream>
 #include <cstdint>
 #include <cstring>
+#include <regex>
 
 void Emulator::systemInit(){
 	registers.SP = STACK_START;
@@ -129,12 +130,26 @@ void Emulator::loadProgramFromFile(std::string filePath){
 	std::unordered_map<std::string, Section> sectTable;
 	std::ifstream in(filePath);
 
+	// read size and start point
+	std::string programInfo;
+	std::getline(in, programInfo);
+	if (std::regex_search(programInfo, std::regex("^SIZE=[0-9]+ START_POINT=[0-9]+$"))) {
+		std::queue<std::string> tokens = util::tokenize(programInfo, " ");
+		std::string token = tokens.front();
+		programSize = std::stoi(token.substr(5, token.npos));
+		tokens.pop();
+		token = tokens.front();
+		programStart = std::stoi(token.substr(12, token.npos));
+
+	}
+	else throw std::runtime_error("Invalid file format");
 
 	ObjectFileReader::readSymbolandSectionTable(symTable, sectTable, in);
 
 	uint16_t size = 0;
 	for (auto sect : sectTable) {
-		size += sect.second.size;
+		if(sect.first != ".bss")
+			size += sect.second.size;
 	}
 
 	uint8_t* data = new uint8_t[size];
@@ -143,6 +158,11 @@ void Emulator::loadProgramFromFile(std::string filePath){
 
 	memcpy(memory, data, size);
 
+	if (sectTable.find(".bss") != sectTable.end()) {
+		uint16_t bssSize = sectTable.at(".bss").size;
+		for (int i = size; i < size + bssSize; i++)
+			memory[i] = 0;
+	}
 
 	for (int i = 0; i < size; i++) {
 		std::cout << util::convertDecimalToString(memory[i], true) << " ";
@@ -184,8 +204,8 @@ Emulator & Emulator::operator=(const Emulator & emu) {
 void Emulator::emulate(std::string filePath){
 	systemInit();	
 	loadProgramFromFile(filePath);
-
+	if (programSize > MAX_PROG_SIZE) throw std::runtime_error("Program to large to be ran");
 	program = new Program(*this);
-	registers.PC = 5; // hardcoded code start for testing purpose
+	registers.PC = programStart;
 	program->run();
 }

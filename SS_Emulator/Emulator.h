@@ -15,10 +15,13 @@ private:
 	static const size_t MAPPED_REG_START = 0xFF00;
 	static const size_t IVTP = 0x0000;
 	static const size_t IVT_SIZE = 2 * 8;
+	static const size_t MAX_PROG_SIZE = 0xF000;
 	
 	Program* program;
+	uint16_t programStart;
+	size_t programSize;
 
-	uint8_t memory[MEM_SIZE]; // JEBACU TI MATER
+	uint8_t memory[MEM_SIZE]; 
 	struct {
 		int16_t R0;
 		int16_t R1;

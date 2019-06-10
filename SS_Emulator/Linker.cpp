@@ -25,6 +25,12 @@ void Linker::firstPass(){
 	}
 
 	// check if there is undefined symbols or symbol main is not defined[TO:DO]
+	bool foundMain = false;
+	for (auto const& sym : symbolTable) {
+		if (sym.second.section == 0) throw std::runtime_error("LINKING ERROR: Unresolved symbol: " + sym.first);
+		if (sym.first == "main") foundMain = true;
+	}
+	if (!foundMain) throw std::runtime_error("LINKING ERROR: No main found");
 	
 
 	// update section start values
@@ -32,9 +38,18 @@ void Linker::firstPass(){
 	uint16_t locationCounter = 0;
 	std::unordered_map<uint16_t, uint16_t> startAddrs; // temp map for section rb to section run time addr
 	for (auto const& sect : sectionTable) {
-		symbolTable.at(sect.first).value = locationCounter;
-		startAddrs.insert({ sect.second.rb,locationCounter });
-		locationCounter += sect.second.size;
+		if (sect.first != ".bss") {
+			symbolTable.at(sect.first).value = locationCounter;
+			startAddrs.insert({ sect.second.rb,locationCounter });
+			locationCounter += sect.second.size;
+		}
+	}
+	// add bss at the end for easier loading
+	if (sectionTable.find(".bss") != sectionTable.end()) {
+		Section& sect = sectionTable.at(".bss");
+		symbolTable.at(sect.name).value = locationCounter;
+		startAddrs.insert({ sect.rb,locationCounter });
+		locationCounter += sect.size;
 	}
 
 	// update symbol offset to run time addrs
@@ -119,8 +134,8 @@ void Linker::addSymbols(){
 				sym.value = symbol.second.value + sectionLocationCounterTable.at(sectionName); // update offset in section
 			}
 			else {
-				if (symbol.second.section == 0) continue; // udefined symbol already defined, skip ahead
-				else {} // throw multiply definitions exception
+				if (symbol.second.section == 0) continue; // undefined symbol already defined, skip ahead
+				else if(symbol.second.section != symbol.second.rb) std::runtime_error("LINKING ERROR: Multiple symbol definition");
 			}
 		}
 	}
@@ -211,11 +226,15 @@ void Linker::loadRetTablesAndFix(std::ifstream & in) {
 void Linker::output(){
 	std::ofstream out(outputFile);
 	
-	// section table
+	// file size and start point
 	uint16_t size = 0;
+	for (auto const& sec : sectionTable) size += sec.second.size;
+	out << "SIZE=" << size << " START_POINT=" << symbolTable.at("main").value << std::endl;
+
+	// section table
+
 	out << "#sectab" << std::endl;
 	for (auto const& sec : sectionTable) {
-		if (sec.first != ".bss") size += sec.second.size;
 		out << sec.second << std::endl;
 	}
 	// symbol table
