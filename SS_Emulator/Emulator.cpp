@@ -9,6 +9,10 @@
 #include <cstdint>
 #include <cstring>
 
+void Emulator::systemInit(){
+	registers.SP = STACK_START;
+}
+
 void Emulator::regWrite(uint16_t val, uint8_t ind){
 	switch (ind) {
 	case 0:
@@ -87,8 +91,7 @@ void Emulator::memWriteWord(uint16_t val, size_t off){
 	memory[off + 1] = high;
 }
 
-uint8_t Emulator::memRead(size_t off)
-{
+uint8_t Emulator::memRead(size_t off){
 	return memory[off];
 }
 
@@ -99,20 +102,26 @@ uint16_t Emulator::memReadWord(size_t off){
 }
 
 void Emulator::stackPush(uint8_t val){
-
+	registers.SP--;
+	memWrite(val, registers.SP);
 }
 
 void Emulator::stackPushWord(uint16_t val){
-
+	registers.SP -= 2;
+	memWriteWord(val, registers.SP);
 }
 
 int8_t Emulator::stackPop()
-{
-	return int8_t();
+{	
+	int8_t ret = memRead(registers.SP);
+	registers.SP++;
+	return ret;
 }
 
 int16_t Emulator::stackPopWord(){
-	return int16_t();
+	int16_t ret = memReadWord(registers.SP);
+	registers.SP += 2;
+	return ret;
 }
 
 void Emulator::loadProgramFromFile(std::string filePath){
@@ -152,6 +161,7 @@ Emulator::~Emulator(){
 }
 
 void Emulator::emulate(std::string filePath){
+	systemInit();	
 	loadProgramFromFile(filePath);
 
 	program = new Program(*this);

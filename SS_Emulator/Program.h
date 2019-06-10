@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <functional>
 
+
 class Emulator;
 
 class Program {
@@ -61,6 +62,7 @@ private:
 
 public:
 	Program(Emulator& emu) : emulator(emu) {}
+	~Program() {}
 
 	void run(); 
 

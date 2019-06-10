@@ -228,8 +228,8 @@ void Assembler::handleInstruction(Instruction* inst,std::ofstream& out){
 	for (int i = 0; i < Instruction::numOfOperands.at(inst->getName()); i++) {
 		if (i == 0) { // first operand
 			handleOperand(inst->getFirstOprField(), inst->getFirstOprAddr(), instAttr , out);
-			if (std::regex_search(inst->getName(), std::regex("(add|sub|div|mul|not|and|or|xor|shl|shr)")) && inst->getFirstOprAddr() != Instruction::AddrCodes::REGDIR)
-				throw util::AssemblerException("First operand of artihmetic or logic operation must be a register");
+			if (std::regex_search(inst->getName(), std::regex("(xchg|add|sub|div|mul|not|and|or|xor|shl|shr|pop)")) && inst->getFirstOprAddr() != Instruction::AddrCodes::REGDIR)
+				throw util::AssemblerException("First operand of artihmetic, logic, pop, xchg operation must be a register");
 		}
 		else { // second operand
 			handleOperand(inst->getSecondOprField(), inst->getSecondOprAddr(), instAttr | 16, out); // 5 bit of instAttr used to specify that it is the second opr

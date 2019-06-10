@@ -209,6 +209,7 @@ void Program::XCHG_EXECUTOR(){
 }
 
 void Program::INT_EXECUTOR(){
+	emulator.stackPushWord(emulator.registers.PC);
 	emulator.stackPushWord(emulator.PSW.val);
 	emulator.registers.PC = emulator.memory[decodeVal(opr1Descr, opr1Val) % 8 * 2];
 }
@@ -220,109 +221,211 @@ void Program::MOV_EXECUTOR(){
 	else 
 		if (instructionDescr & 4) emulator.memWriteWord(val, adr);
 		else emulator.memWrite(val, adr);
+	// set flags 
+	emulator.PSW.N = val < 0;
+	emulator.PSW.Z = val == 0;
 }
 
 void Program::SUB_EXECUTOR(){
 	int16_t val1 = decodeVal(opr1Descr, opr1Val);
 	int16_t val2 = decodeVal(opr2Descr, opr2Val);
 	uint8_t reg = decodeAdr(opr1Descr, opr1Val);
-	emulator.regWrite(val1 - val2, reg);
+	bool word = instructionDescr & 4;
+	int16_t val = word ? val1 - val2 : (int8_t) val1 - (int8_t) val2;
+	emulator.regWrite(val, reg);
+	// set flags
+	emulator.PSW.N = val < 0;
+	emulator.PSW.Z = val == 0;
+	emulator.PSW.O = val1 > 0 && val2 < 0 && val < 0 || val1 < 0 && val2 > 0 && val > 0;
+	emulator.PSW.C = val1 >= 0 && val < 0;
 }
 
 void Program::ADD_EXECUTOR(){
 	int16_t val1 = decodeVal(opr1Descr, opr1Val);
 	int16_t val2 = decodeVal(opr2Descr, opr2Val);
 	uint8_t reg = decodeAdr(opr1Descr, opr1Val);
-	emulator.regWrite(val1 + val2, reg);
+	bool word = instructionDescr & 4;
+	int16_t val = (word ? val1 + val2 : (int8_t)val1 + (int8_t)val2);
+	emulator.regWrite(val, reg);
+	// set flags
+	emulator.PSW.N = val < 0;
+	emulator.PSW.Z = val == 0;
+	emulator.PSW.O = val1 > 0 && val2 > 0 && val < 0 || val1 < 0 && val2 < 0 && val > 0;
+	emulator.PSW.C = (val1 < 0 || val2 < 0) && val > 0;
 }
 
 void Program::MUL_EXECUTOR(){
 	int16_t val1 = decodeVal(opr1Descr, opr1Val);
 	int16_t val2 = decodeVal(opr2Descr, opr2Val);
 	uint8_t reg = decodeAdr(opr1Descr, opr1Val);
-	emulator.regWrite(val1 * val2, reg);
+	bool word = instructionDescr & 4;
+	int16_t val = word ? val1 * val2 : (int8_t)val1 * (int8_t)val2;
+	emulator.regWrite(val, reg);
+	// set flags
+	emulator.PSW.N = val < 0;
+	emulator.PSW.Z = val == 0;
 }
 
 void Program::DIV_EXECUTOR(){
 	int16_t val1 = decodeVal(opr1Descr, opr1Val);
 	int16_t val2 = decodeVal(opr2Descr, opr2Val);
 	uint8_t reg = decodeAdr(opr1Descr, opr1Val);
-	emulator.regWrite(val1 / val2, reg);
+	bool word = instructionDescr & 4;
+	int16_t val = word ? val1 / val2 : (int8_t)val1 / (int8_t)val2;
+	emulator.regWrite(val, reg);
+	// set flags
+	emulator.PSW.N = val < 0;
+	emulator.PSW.Z = val == 0;
 }
 
 void Program::CMP_EXECUTOR(){
-
+	int16_t val1 = decodeVal(opr1Descr, opr1Val);
+	int16_t val2 = decodeVal(opr2Descr, opr2Val);
+	bool word = instructionDescr & 4;
+	int16_t val = word ? val1 - val2 : (int8_t)val1 - (int8_t)val2;
+	// set flags
+	emulator.PSW.N = val < 0;
+	emulator.PSW.Z = val == 0;
+	emulator.PSW.O = val1 > 0 && val2 < 0 && val < 0 || val1 < 0 && val2 > 0 && val > 0;
+	emulator.PSW.C = val1 >= 0 && val < 0;
 }
 
 void Program::NOT_EXECUTOR(){
-
+	uint16_t val1 = decodeVal(opr1Descr, opr1Val);
+	uint8_t reg = decodeAdr(opr1Descr, opr1Val);
+	bool word = instructionDescr & 4;
+	int16_t val = word ? ~val1 :  ~((uint8_t)val1);
+	emulator.regWrite(val, reg);
+	// set flags
+	emulator.PSW.N = val < 0;
+	emulator.PSW.Z = val == 0;
 }
 
 void Program::AND_EXECUTOR(){
 	uint16_t val1 = decodeVal(opr1Descr, opr1Val);
 	uint16_t val2 = decodeVal(opr2Descr, opr2Val);
 	uint8_t reg = decodeAdr(opr1Descr, opr1Val);
-	emulator.regWrite(val1 & val2, reg);
+	bool word = instructionDescr & 4;
+	int16_t val = word ? val1 & val2 : (uint8_t)val1 & (uint8_t)val2;
+	emulator.regWrite(val, reg);
+	// set flags
+	emulator.PSW.N = val < 0;
+	emulator.PSW.Z = val == 0;
 }
 
 void Program::OR_EXECUTOR(){
 	uint16_t val1 = decodeVal(opr1Descr, opr1Val);
 	uint16_t val2 = decodeVal(opr2Descr, opr2Val);
 	uint8_t reg = decodeAdr(opr1Descr, opr1Val);
-	emulator.regWrite(val1 | val2, reg);
+	bool word = instructionDescr & 4;
+	int16_t val = word ? val1 | val2 : (uint8_t)val1 | (uint8_t)val2;
+	emulator.regWrite(val, reg);
+	// set flags
+	emulator.PSW.N = val < 0;
+	emulator.PSW.Z = val == 0;
 }
 
 void Program::XOR_EXECUTOR(){
 	uint16_t val1 = decodeVal(opr1Descr, opr1Val);
 	uint16_t val2 = decodeVal(opr2Descr, opr2Val);
 	uint8_t reg = decodeAdr(opr1Descr, opr1Val);
-	emulator.regWrite(val1 ^ val2, reg);
+	bool word = instructionDescr & 4;
+	int16_t val = word ? val1 ^ val2 : (uint8_t)val1 ^ (uint8_t)val2;
+	emulator.regWrite(val, reg);
+	// set flags
+	emulator.PSW.N = val < 0;
+	emulator.PSW.Z = val == 0;
 }
 
 void Program::TEST_EXECUTOR(){
-
+	uint16_t val1 = decodeVal(opr1Descr, opr1Val);
+	uint16_t val2 = decodeVal(opr2Descr, opr2Val);
+	bool word = instructionDescr & 4;
+	int16_t val = word ? val1 & val2 : (uint8_t)val1 & (uint8_t)val2;
+	// set flags
+	emulator.PSW.N = val < 0;
+	emulator.PSW.Z = val == 0;
 }
 
-void Program::SHL_EXECUTOR()
-{
+void Program::SHL_EXECUTOR(){
+	uint16_t val1 = decodeVal(opr1Descr, opr1Val);
+	uint16_t val2 = decodeVal(opr2Descr, opr2Val);
+	bool word = instructionDescr & 4;
+	int16_t val = word ? val1 << val2 : (uint8_t)val1 << (uint8_t)val2;
+	uint8_t reg = decodeAdr(opr1Descr, opr1Val);
+	emulator.regWrite(val, reg);
+	// set flags
+	emulator.PSW.N = val < 0;
+	emulator.PSW.Z = val == 0;
+	emulator.PSW.C = word ? (val1 & (1 << (16 - val2))) > 0 : ((uint8_t) val1 & ( 1 << (8 - val2))) > 0;
 }
 
-void Program::SHR_EXECUTOR()
-{
+void Program::SHR_EXECUTOR(){
+	uint16_t val1 = decodeVal(opr1Descr, opr1Val);
+	uint16_t val2 = decodeVal(opr2Descr, opr2Val);
+	bool word = instructionDescr & 4;
+	int16_t val = word ? val1 >> val2 : (uint8_t)val1 >> (uint8_t)val2;
+	uint8_t reg = decodeAdr(opr1Descr, opr1Val);
+	emulator.regWrite(val, reg);
+	// set flags
+	emulator.PSW.N = val < 0;
+	emulator.PSW.Z = val == 0;
+	emulator.PSW.C = word ? (val1 & (1 << val2-1)) > 0 : ((uint8_t)val1 & (1 << (uint8_t)val2 - 1)) > 0;
 }
 
-void Program::PUSH_EXECUTOR()
-{
+void Program::PUSH_EXECUTOR(){
+	bool word = instructionDescr & 4;
+	uint16_t val = decodeVal(opr1Descr, opr1Val);
+	if (word) 
+		emulator.stackPushWord(val);
+	else 
+		emulator.stackPush(val);
 }
 
-void Program::POP_EXECUTOR()
-{
+void Program::POP_EXECUTOR(){
+	bool word = instructionDescr & 4;
+	uint8_t reg = decodeAdr(opr1Descr, opr1Val);
+	if (word) emulator.regWrite(emulator.stackPopWord(), reg);
+	else emulator.regWrite(emulator.stackPop(), reg);
 }
 
-void Program::JMP_EXECUTOR()
-{
+void Program::JMP_EXECUTOR(){
+	uint16_t addr = decodeAdr(opr1Descr, opr1Val);
+	emulator.registers.PC = addr;
 }
 
-void Program::JEQ_EXECUTOR()
-{
+void Program::JEQ_EXECUTOR(){
+	if (emulator.PSW.Z) {
+		uint16_t addr = decodeAdr(opr1Descr, opr1Val);
+		emulator.registers.PC = addr;
+	}
 }
 
-void Program::JNE_EXECUTOR()
-{
+void Program::JNE_EXECUTOR(){
+	if (!emulator.PSW.Z) {
+		uint16_t addr = decodeAdr(opr1Descr, opr1Val);
+		emulator.registers.PC = addr;
+	}
 }
 
-void Program::JGT_EXECUTOR()
-{
+void Program::JGT_EXECUTOR(){
+	if (!emulator.PSW.Z && emulator.PSW.N == emulator.PSW.O) {
+		uint16_t addr = decodeAdr(opr1Descr, opr1Val);
+		emulator.registers.PC = addr;
+	}
 }
 
-void Program::CALL_EXECUTOR()
-{
+void Program::CALL_EXECUTOR(){
+	emulator.stackPushWord(emulator.registers.PC);
+	uint16_t addr = decodeAdr(opr1Descr, opr1Val);
+	emulator.registers.PC = addr;
 }
 
-void Program::RET_EXECUTOR()
-{
+void Program::RET_EXECUTOR(){
+	emulator.registers.PC = emulator.stackPopWord();
 }
 
-void Program::IRET_EXECUTOR()
-{
+void Program::IRET_EXECUTOR(){
+	emulator.PSW.val = emulator.stackPopWord();
+	emulator.registers.PC = emulator.stackPopWord();
 }

@@ -60,18 +60,6 @@
     <ClCompile Include="RelocationEntry.cpp">
       <Filter>Source Files\assembler_cpp</Filter>
     </ClCompile>
-    <ClCompile Include="Section.cpp">
-      <Filter>Source Files\assembler_cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="Symbol.cpp">
-      <Filter>Source Files\assembler_cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="Test.cpp">
-      <Filter>Source Files\assembler_cpp</Filter>
-    </ClCompile>
-    <ClCompile Include="Util.cpp">
-      <Filter>Source Files\assembler_cpp</Filter>
-    </ClCompile>
     <ClCompile Include="Linker.cpp">
       <Filter>Source Files\linker_cpp</Filter>
     </ClCompile>
@@ -84,11 +72,20 @@
     <ClCompile Include="ObjectFileReader.cpp">
       <Filter>Source Files\common</Filter>
     </ClCompile>
+    <ClCompile Include="Section.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="Symbol.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="Util.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.cpp">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Util.h">
-      <Filter>Header Files\assembler_h</Filter>
-    </ClInclude>
     <ClInclude Include="Assembler.h">
       <Filter>Header Files\assembler_h</Filter>
     </ClInclude>
@@ -113,12 +110,6 @@
     <ClInclude Include="RelocationEntry.h">
       <Filter>Header Files\assembler_h</Filter>
     </ClInclude>
-    <ClInclude Include="Section.h">
-      <Filter>Header Files\assembler_h</Filter>
-    </ClInclude>
-    <ClInclude Include="Symbol.h">
-      <Filter>Header Files\assembler_h</Filter>
-    </ClInclude>
     <ClInclude Include="Linker.h">
       <Filter>Header Files\linker_h</Filter>
     </ClInclude>
@@ -129,6 +120,15 @@
       <Filter>Header Files\emulator_h</Filter>
     </ClInclude>
     <ClInclude Include="ObjectFileReader.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="Section.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="Symbol.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="Util.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
   </ItemGroup>
