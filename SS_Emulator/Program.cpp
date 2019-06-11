@@ -174,6 +174,18 @@ void Program::execute(){
 	}
 }
 
+void Program::handleInterrupts(){
+
+	if (emulator.keyboardInterrupt) {
+		if (emulator.lastCharRead) {
+			emulator.lastCharRead = false;
+			emulator.memWrite(emulator.keyboardBuffer, emulator.TERMINAL_DATA_IN_REG);
+			emulator.memWrite(1, emulator.TERMINAL_DATA_IN_REG + 1); // used as status
+			emulator.keyboardInterrupt = false;
+		}
+	}
+}
+
 
 
 
@@ -194,6 +206,7 @@ void Program::run() {
 		execute();
 		handleInterrupts();
 	}
+
 }
 
 void Program::HALT_EXECUTOR(){

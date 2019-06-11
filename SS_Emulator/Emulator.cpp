@@ -9,9 +9,20 @@
 #include <cstdint>
 #include <cstring>
 #include <regex>
+#include <thread>
+
+
+
+volatile char Emulator::keyboardBuffer = '0';
+volatile bool Emulator::keyboardInterrupt = false;
+volatile bool Emulator::lastCharRead = true;
 
 void Emulator::systemInit(){
 	registers.SP = STACK_START;
+	keyboardThread = new std::thread(Emulator::keyboardThreadRun);
+	keyboardThread->detach();
+	terminalThread = new std::thread(Emulator::terminalThreadRun);
+	terminalThread->detach();
 }
 
 void Emulator::regWrite(uint16_t val, uint8_t ind){
@@ -81,22 +92,31 @@ int16_t Emulator::regRead(uint8_t ind)
 	return val;
 }
 
-void Emulator::memWrite(uint8_t val, size_t off){
+void Emulator::memWrite(uint8_t val, uint16_t off){
+	if (off > MEM_SIZE) throw std::runtime_error("memory index out of bounds");
 	memory[off] = val;
 }
 
-void Emulator::memWriteWord(uint16_t val, size_t off){
+void Emulator::memWriteWord(uint16_t val, uint16_t off){
+	if (off > MEM_SIZE) throw std::runtime_error("memory index out of bounds");
 	uint8_t low = val & 0xFF;
 	uint8_t high = val >> 8;
 	memory[off] = low;
 	memory[off + 1] = high;
 }
 
-uint8_t Emulator::memRead(size_t off){
+uint8_t Emulator::memRead(uint16_t off){
+	if (off > MEM_SIZE) throw std::runtime_error("memory index out of bounds");
+	if (off == TERMINAL_DATA_IN_REG) {
+		lastCharRead = true;
+		memory[off + 1] = 0;
+	}
 	return memory[off];
 }
 
-uint16_t Emulator::memReadWord(size_t off){
+uint16_t Emulator::memReadWord(uint16_t off){
+	if (off > MEM_SIZE) throw std::runtime_error("memory index out of bounds");
+	if (off == TERMINAL_DATA_IN_REG) lastCharRead = true;
 	uint16_t val = memory[off + 1] << 8;
 	val |= memory[off];
 	return val;
@@ -125,8 +145,8 @@ int16_t Emulator::stackPopWord(){
 	return ret;
 }
 
-void Emulator::loadProgramFromFile(std::string filePath){
-	std::unordered_map<unsigned short, Symbol> symTable; 
+void Emulator::loadProgramFromFile(std::string filePath) {
+	std::unordered_map<unsigned short, Symbol> symTable;
 	std::unordered_map<std::string, Section> sectTable;
 	std::ifstream in(filePath);
 
@@ -148,7 +168,7 @@ void Emulator::loadProgramFromFile(std::string filePath){
 
 	uint16_t size = 0;
 	for (auto sect : sectTable) {
-		if(sect.first != ".bss")
+		if (sect.first != ".bss")
 			size += sect.second.size;
 	}
 
@@ -156,28 +176,119 @@ void Emulator::loadProgramFromFile(std::string filePath){
 
 	in.read((char*)data, size);
 
-	memcpy(memory, data, size);
+	ObjectFileReader::readRetTables(sectTable, in);
+	in.close();
+
+	// fix data
+	placeSectionsAndFix(sectTable, symTable,data);
+
+	// copy to memmory
+	for (auto const& sect : sectTable) {
+		if (sect.first != ".bss")
+			memcpy(memory + startAddrs.at(sect.first), data + symTable.at(sect.second.rb).value, sect.second.size);
+	}
 
 	if (sectTable.find(".bss") != sectTable.end()) {
 		uint16_t bssSize = sectTable.at(".bss").size;
-		for (int i = size; i < size + bssSize; i++)
+		uint16_t bssStart = startAddrs.at(".bss");
+		for (int i = bssStart; i < bssStart + bssSize; i++)
 			memory[i] = 0;
 	}
 
-	for (int i = 0; i < size; i++) {
-		std::cout << util::convertDecimalToString(memory[i], true) << " ";
-	}
 	delete[] data;
+
+
 
 	in.close();
 }
 
+
+void Emulator::placeSectionsAndFix(std::unordered_map<std::string, Section>& sectTable, std::unordered_map<unsigned short, Symbol> & symTable,uint8_t* data){
+	// check if sections overlap
+	size_t highestLocation = DEFAULT_PROG_OFFSET;
+	for (auto const& startAddr : startAddrs) {
+		if (sectTable.find(startAddr.first) == sectTable.end()) throw std::runtime_error("No such section " + startAddr.first);
+		size_t endAddr = startAddr.second + sectTable.at(startAddr.first).size;
+		if (highestLocation < endAddr) highestLocation = endAddr;
+		for (auto const& startAddrToCompare : startAddrs) {
+			if (startAddr.second != startAddrToCompare.second && (startAddrToCompare.second < endAddr  && startAddrToCompare.second >= startAddr.second))
+				throw std::runtime_error("Sections overlap, cant run in current mode");
+		}
+	}
+	// no overlaping sections add start addreses of remaining unplaced sections
+	for (auto const& sect : sectTable) {
+		if (startAddrs.find(sect.first) == startAddrs.end()) {
+			startAddrs.insert({ sect.first, highestLocation });
+			highestLocation += sect.second.size;
+		}
+	}
+
+	// check if last section is not above the limit
+	if (highestLocation - 1 >= PROGRAM_LIMIT) throw std::runtime_error("program excedes address limit");
+
+	// fix data
+	for (auto const& sect : sectTable) {
+		if (sect.second.relocationTable) {
+			for (auto const& relEntry : *sect.second.relocationTable) {
+				Symbol& referencedSymbol = symTable.at(relEntry.symbol);
+				int16_t referencedSymbolDisp = startAddrs.at(referencedSymbol.name) - referencedSymbol.value;
+				int16_t oldVal = ((uint16_t)data[relEntry.offset + 1]) << 8 | data[relEntry.offset];
+				int16_t newVal = 0;
+				if (relEntry.type == RelocationEntry::Type::R_386_32) newVal = oldVal + referencedSymbolDisp;
+				else if (relEntry.type == RelocationEntry::Type::R_386_N32) newVal = oldVal - referencedSymbolDisp;
+				else {
+					Symbol& currentSymbol = symTable.at(sect.second.rb);
+					int16_t currentSymbolDisp = startAddrs.at(currentSymbol.name) - currentSymbol.value;
+					newVal = referencedSymbolDisp - currentSymbolDisp + oldVal;
+				}
+
+				data[relEntry.offset] = newVal & 0xFF;
+				data[relEntry.offset + 1] = newVal >> 8;
+
+			}
+		}
+	}
+
+	// move starting point
+	programStart += startAddrs.at(".text") - symTable.at(sectTable.at(".text").rb).value; // assuming main is in text for now
+
+
+
+}
+
+void Emulator::keyboardThreadRun(){
+
+	std::cout << "Keyboard listener started" << std::endl;
+	keyboardInterrupt = false;
+	while (true) {
+		while(keyboardInterrupt){} // wait for the buffer to be emptied
+
+		std::cout << "Keyboard listener passed barrier" << std::endl;
+
+		char tempBuffer;
+		std::cin >> std::noskipws >> tempBuffer;
+
+		std::cout << "Keyboard listener read char" << std::endl;
+		keyboardBuffer = tempBuffer;
+		keyboardInterrupt = true;
+
+	}
+}
+
+void Emulator::terminalThreadRun(){
+	while (1) {
+
+	}
+}
+
 Emulator::Emulator(){
-	//memory = new uint8_t[MEM_SIZE];
+	
 }
 
 Emulator::~Emulator(){
 	delete program;
+	delete keyboardThread;
+	delete terminalThread;
 	//delete[] memory;
 }
 
@@ -201,11 +312,13 @@ Emulator & Emulator::operator=(const Emulator & emu) {
 	return *this;
 }
 
-void Emulator::emulate(std::string filePath){
-	systemInit();	
+void Emulator::emulate(std::string filePath, std::unordered_map<std::string, uint16_t>& stAddrs){
+	systemInit();
+	startAddrs = stAddrs;
 	loadProgramFromFile(filePath);
-	if (programSize > MAX_PROG_SIZE) throw std::runtime_error("Program to large to be ran");
+	if (programSize > MAX_PROG_SIZE) throw std::runtime_error("Program too large to be ran");
 	program = new Program(*this);
 	registers.PC = programStart;
 	program->run();
+
 }

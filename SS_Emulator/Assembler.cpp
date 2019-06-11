@@ -187,6 +187,7 @@ void Assembler::addSection(std::string name, unsigned short size, unsigned short
 }
 
 signed short Assembler::handleSymbol(std::string name, RelocationEntry::Type type){
+	if (symbolTable.find(name) == symbolTable.end()) throw util::AssemblerException("ASSEMBLING ERROR: No such symbol " + name);
 	Symbol& sym = symbolTable.at(name);
 	if (sym.type == Symbol::Type::ABSOLUT) return sym.value;
 	Section& sect = sectionTable.at(currentSection);
