@@ -3,6 +3,7 @@
 
 #include "Symbol.h"
 #include "Section.h"
+#include "RelocationEntry.h"
 #include <unordered_map>
 #include <string>
 
@@ -12,6 +13,7 @@ private:
 public:
 
 	static void readSymbolandSectionTable(std::unordered_map<unsigned short, Symbol>& symTable, std::unordered_map<std::string, Section>&sectTable, std::ifstream & in);
+	static void readRetTables(std::unordered_map<std::string, Section> & retTables, std::ifstream& it);
 
 };
 

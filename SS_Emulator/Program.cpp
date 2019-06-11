@@ -192,6 +192,7 @@ void Program::run() {
 	while (running) {
 		readInstruction();
 		execute();
+		handleInterrupts();
 	}
 }
 
