@@ -16,12 +16,14 @@
 volatile char Emulator::keyboardBuffer = '0';
 volatile bool Emulator::keyboardInterrupt = false;
 volatile bool Emulator::lastCharRead = true;
+volatile bool Emulator::dataReady = false;
 
 void Emulator::systemInit(){
 	registers.SP = STACK_START;
+	memory[TERMINAL_DATA_OUT_REG + 1] = 1;
 	keyboardThread = new std::thread(Emulator::keyboardThreadRun);
 	keyboardThread->detach();
-	terminalThread = new std::thread(Emulator::terminalThreadRun);
+	terminalThread = new std::thread(Emulator::terminalThreadRun,memory);
 	terminalThread->detach();
 }
 
@@ -95,6 +97,10 @@ int16_t Emulator::regRead(uint8_t ind)
 void Emulator::memWrite(uint8_t val, uint16_t off){
 	if (off > MEM_SIZE) throw std::runtime_error("memory index out of bounds");
 	memory[off] = val;
+	if (off == TERMINAL_DATA_OUT_REG) {
+		memory[off + 1] = 0;
+		dataReady = true;
+	}
 }
 
 void Emulator::memWriteWord(uint16_t val, uint16_t off){
@@ -107,16 +113,16 @@ void Emulator::memWriteWord(uint16_t val, uint16_t off){
 
 uint8_t Emulator::memRead(uint16_t off){
 	if (off > MEM_SIZE) throw std::runtime_error("memory index out of bounds");
+	uint8_t ret = memory[off];
 	if (off == TERMINAL_DATA_IN_REG) {
-		lastCharRead = true;
 		memory[off + 1] = 0;
+		lastCharRead = true;
 	}
-	return memory[off];
+	return ret;
 }
 
 uint16_t Emulator::memReadWord(uint16_t off){
 	if (off > MEM_SIZE) throw std::runtime_error("memory index out of bounds");
-	if (off == TERMINAL_DATA_IN_REG) lastCharRead = true;
 	uint16_t val = memory[off + 1] << 8;
 	val |= memory[off];
 	return val;
@@ -258,26 +264,24 @@ void Emulator::placeSectionsAndFix(std::unordered_map<std::string, Section>& sec
 
 void Emulator::keyboardThreadRun(){
 
-	std::cout << "Keyboard listener started" << std::endl;
 	keyboardInterrupt = false;
 	while (true) {
 		while(keyboardInterrupt){} // wait for the buffer to be emptied
-
-		std::cout << "Keyboard listener passed barrier" << std::endl;
-
 		char tempBuffer;
 		std::cin >> std::noskipws >> tempBuffer;
-
-		std::cout << "Keyboard listener read char" << std::endl;
 		keyboardBuffer = tempBuffer;
 		keyboardInterrupt = true;
-
 	}
 }
 
-void Emulator::terminalThreadRun(){
-	while (1) {
-
+void Emulator::terminalThreadRun(uint8_t* mem){
+	while (true) {
+		if (dataReady) {	
+			char outChar = mem[TERMINAL_DATA_OUT_REG];
+			mem[TERMINAL_DATA_OUT_REG + 1] = 1;
+			std::cout << outChar;
+			dataReady = false;
+		}
 	}
 }
 

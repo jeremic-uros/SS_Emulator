@@ -80,7 +80,8 @@ private:
 	static volatile bool keyboardInterrupt;
 	static volatile bool lastCharRead;
 
-	static void terminalThreadRun();
+	static void terminalThreadRun(uint8_t* mem);
+	static volatile bool dataReady;
 
 	std::thread* keyboardThread;
 	std::thread* terminalThread;
