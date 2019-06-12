@@ -9,7 +9,7 @@
 int util::convertStringToDecimal(std::string val){
 	std::stringstream ss;
 	int decimal = 0;
-	if (val[1] == 'x') {
+	if (val[1] == 'x' || (val.size() >= 3 && val[2] == 'x')) {
 		ss << val;
 		ss >> std::hex >> decimal;
 	}

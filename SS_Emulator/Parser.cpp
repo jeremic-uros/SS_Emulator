@@ -15,11 +15,11 @@ std::unordered_map<std::string, std::regex> Parser::tokenParsers = {
 	{"instruction", std::regex("^(halt|xchg|int|mov|add|sub|mul|div|cmp|not|and|or|xor|test|shl|shr|push|pop|jmp|jeq|jne|jgt|call|ret|iret)(b|w)?$")},
 	{"directive", std::regex("^\\.(text|data|bss|equ|global|extern|section|byte|word|align|skip|end)$")},
 	{"symbol", std::regex("^" + symbolRegex + "$")},
-	{"val",std::regex("^" + valRegex + "$")},
+	{"val",std::regex("^-?" + valRegex + "$")},
 	// instruction operands parsers
 	{"regdir",std::regex("^((r[0-7])|sp|pc)(h|l)?$")},
 	{"regin", std::regex("^(\\[(r[0-7]|sp|pc)\\])$")},
-	{"reginx",std::regex("^r[0-7]\\[(" + valRegex + "|" + symbolRegex + ")\\]$")},
+	{"reginx",std::regex("^r[0-7]\\[(-?" + valRegex + "|" + symbolRegex + ")\\]$")},
 	{"pcrel",std::regex("^\\$" + symbolRegex + "$")},
 	{"absolut", std::regex("^\\*" + valRegex + "$")},
 	{"symbolImm",std::regex("^&" + symbolRegex + "$")},
@@ -27,7 +27,6 @@ std::unordered_map<std::string, std::regex> Parser::tokenParsers = {
 	{"expr", std::regex("^(" + valRegex + "|" + symbolRegex + ")([\\+\\-](" + valRegex + "|" + symbolRegex + "))*" + "$")},
 	{"sectionName",std::regex("^\\." + symbolRegex + "$")},
 	{"symbolArray", std::regex("^("+symbolRegex+"|,)$") }
-
 };
 
 
