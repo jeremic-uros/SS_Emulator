@@ -158,12 +158,14 @@ void Parser::parseInstructionOperands(std::queue<std::string>* tokens, Instructi
 			token.pop_back();
 			std::string comma = ",";
 			field = token.replace((size_t)2,(size_t)1,comma);
-			if(util::convertStringToDecimal(field.substr(3, field.npos)) >> 8 ) addr = Instruction::addressingCodes.at("reginx16");
-			else {
-				addr = Instruction::addressingCodes.at("reginx8");
-				instructionSize--;
-			}
-			 
+			std::string disp = field.substr(3, field.npos);
+			if (std::regex_search(disp, tokenParsers.at("val"))) {
+				if (util::convertStringToDecimal(field.substr(3, field.npos)) >> 8) addr = Instruction::addressingCodes.at("reginx16");
+				else {
+					addr = Instruction::addressingCodes.at("reginx8");
+						instructionSize--;
+				}
+			}		 
 		}
 		else if (std::regex_search(token, tokenParsers.at("val"))) {
 			field = token;
@@ -251,7 +253,7 @@ void Parser::parseDirective(std::queue<std::string>* tokens, Directive * dir) {
 			else throw util::AssemblerException("PARSING ERROR: Invalid directive param");
 		}
 	}
-	unsigned char size = 0;
+	unsigned short size = 0;
 	if (name == "word") size = 2;
 	else if (name == "byte") size = 1;
 	else if (name == "skip") {

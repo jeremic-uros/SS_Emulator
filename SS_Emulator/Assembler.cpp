@@ -37,7 +37,7 @@ void Assembler::firstRun(){
 		if (parsedLine) {
 			std::string name = parsedLine->getName();
 			std::string label = parsedLine->getLabel();
-			unsigned char size = parsedLine->getSize();
+			unsigned short size = parsedLine->getSize();
 			if (name == "end") assembling = false;
 			else if (std::regex_search(name,sectionRegex)) { 
 				// reset location counter and change current section
@@ -418,6 +418,11 @@ void Assembler::formatedOutput(){
 }
 
 void Assembler::formatForLinker(){
+	std::smatch match;
+	if (std::regex_search(outputFileName, match, std::regex(".*\\."))) {
+		outputFileName = match.str(0) + "o";
+	}
+
 	std::ofstream out(outputFileName);
 	// section table
 	out << "#sectab" << std::endl;
@@ -469,7 +474,7 @@ bool Assembler::assemble(){
 
 		secondRun();
 
-		//formatedOutput();
+		formatedOutput();
 		formatForLinker(); 
 	return true;
 }

@@ -13,7 +13,7 @@ protected:
 	void write(std::ostream& it) const override;
 public:
 	Directive() : ParsedLine(), param("") {}
-	Directive(unsigned char typ, std::string lbl, std::string nam = "", unsigned char sz = 0) : ParsedLine(typ,lbl,nam,sz),param("") {}
+	Directive(unsigned char typ, std::string lbl, std::string nam = "", unsigned short sz = 0) : ParsedLine(typ,lbl,nam,sz),param("") {}
 
 	std::string getParam() { return param; }
 	void setParam(std::string parm) {	param = parm; }

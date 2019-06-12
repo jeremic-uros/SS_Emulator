@@ -18,30 +18,23 @@
 #include <stdint.h>
 
 using namespace std;
-int main() {
+
+
+int main(int argc, char *argv[]) {
 
 	try {
-
-		Assembler asembler("input.txt","output.o");
+		if (argc < 3) return -1;
+		std::string inputFile = argv[1];
+		std::string outputFile = argv[2];
+		Assembler asembler(inputFile,outputFile);
 		asembler.assemble();
-		Assembler asembler1("input1.txt", "output1.o");
-		asembler1.assemble();
-
-
-		std::string * fileNames = new std::string[2];
-		fileNames[0] = "output.o";
-		fileNames[1] = "output1.o";
-		Linker linker(fileNames,2,"out.exec");
-		linker.link();
-
-		Emulator emulator;
-		emulator.emulate("out.exec");
 	}
 	catch (util::AssemblerException e) {
 		cerr << e << endl;
 	}
-
-
+	catch (std::runtime_error e) {
+		cerr << e.what() << endl;
+	}
 	int x;
 	cin >> x;
 	return 0;
