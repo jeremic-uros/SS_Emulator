@@ -5,7 +5,7 @@
 #include <string>
 #include <unordered_map>
 #include <thread>
-#include <mutex>
+#include <chrono>
 
 class Program;
 class Section;
@@ -25,7 +25,10 @@ private:
 	static const uint16_t PROGRAM_LIMIT = 0xF700;
 	static const uint16_t TERMINAL_DATA_OUT_REG = 0xFF00;
 	static const uint32_t TERMINAL_DATA_IN_REG = 0xFF02;
-	
+	static const uint16_t TIMER_CFG_REG = 0xFF10;
+	static std::unordered_map<uint8_t, uint8_t> timerDurations; // for diffrent values of TIMER_CFG_REG
+
+
 	Program* program;
 	uint16_t programStart;
 	size_t programSize;
@@ -80,11 +83,11 @@ private:
 	static volatile bool keyboardInterrupt;
 	static volatile bool lastCharRead;
 
-	static void terminalThreadRun(uint8_t* mem);
-	static volatile bool dataReady;
-
+	static volatile bool dataReady; // used for output
 	std::thread* keyboardThread;
-	std::thread* terminalThread;
+
+
+	std::chrono::time_point<std::chrono::system_clock> lastTimerInterrupt;
 
 	friend class Program;
 public:

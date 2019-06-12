@@ -18,13 +18,25 @@ volatile bool Emulator::keyboardInterrupt = false;
 volatile bool Emulator::lastCharRead = true;
 volatile bool Emulator::dataReady = false;
 
+std::unordered_map<uint8_t, uint8_t> Emulator::timerDurations{
+	{0, 0.5},
+	{1, 1},
+	{2, 1.5},
+	{3, 2},
+	{4, 5},
+	{5, 10},
+	{6, 30},
+	{7, 60},
+};
+
 void Emulator::systemInit(){
 	registers.SP = STACK_START;
 	memory[TERMINAL_DATA_OUT_REG + 1] = 1;
+	memWriteWord(0, TIMER_CFG_REG);
+	lastTimerInterrupt = std::chrono::system_clock::now();
+
 	keyboardThread = new std::thread(Emulator::keyboardThreadRun);
 	keyboardThread->detach();
-	terminalThread = new std::thread(Emulator::terminalThreadRun,memory);
-	terminalThread->detach();
 }
 
 void Emulator::regWrite(uint16_t val, uint8_t ind){
@@ -274,16 +286,6 @@ void Emulator::keyboardThreadRun(){
 	}
 }
 
-void Emulator::terminalThreadRun(uint8_t* mem){
-	while (true) {
-		if (dataReady) {	
-			char outChar = mem[TERMINAL_DATA_OUT_REG];
-			mem[TERMINAL_DATA_OUT_REG + 1] = 1;
-			std::cout << outChar;
-			dataReady = false;
-		}
-	}
-}
 
 Emulator::Emulator(){
 	
@@ -292,8 +294,6 @@ Emulator::Emulator(){
 Emulator::~Emulator(){
 	delete program;
 	delete keyboardThread;
-	delete terminalThread;
-	//delete[] memory;
 }
 
 Emulator::Emulator(const Emulator & emu){

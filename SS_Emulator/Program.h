@@ -4,7 +4,6 @@
 #include <string>
 #include <unordered_map>
 
-
 class Emulator;
 
 class Program {
@@ -25,7 +24,10 @@ private:
 	size_t decodeAdr(uint8_t oprDescr, int16_t oprVal); // returns the number of reg or mem offset 
 	void execute();
 
-	void handleInterrupts(); // delagates control to emulator
+	void handleInterrupts();
+
+	void keyboardInterrupt();
+	void timerInterrupt();
 
 
 	// instruction executors

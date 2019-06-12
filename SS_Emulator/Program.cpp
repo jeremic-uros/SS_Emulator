@@ -3,6 +3,7 @@
 #include "Instruction.h"
 #include <string>
 #include <regex>
+#include <iostream>
 
 void Program::readInstruction(){
 	// get First Byte
@@ -174,16 +175,42 @@ void Program::execute(){
 	}
 }
 
-void Program::handleInterrupts(){
+void Program::handleInterrupts() {
+
+	std::chrono::time_point<std::chrono::system_clock> timeNow = std::chrono::system_clock::now();
+	std::chrono::duration<double> elapsed = timeNow - emulator.lastTimerInterrupt;
+	uint8_t timerCFG = emulator.memory[emulator.TIMER_CFG_REG];
+	if (timerCFG > 7) timerCFG = 0; // if invalid return to default
+	double timerCFGduration = emulator.timerDurations.at(timerCFG);
+
+	if (std::chrono::duration_cast<std::chrono::seconds>(elapsed).count() >= timerCFGduration) {
+		emulator.lastTimerInterrupt = timeNow;
+		timerInterrupt();
+	}
 
 	if (emulator.keyboardInterrupt) {
-		if (emulator.lastCharRead) {
-			emulator.lastCharRead = false;
-			emulator.memWrite(emulator.keyboardBuffer, emulator.TERMINAL_DATA_IN_REG);
-			emulator.memWrite(1, emulator.TERMINAL_DATA_IN_REG + 1); // used as status
-			emulator.keyboardInterrupt = false;
-		}
+		keyboardInterrupt();
 	}
+
+	if (emulator.dataReady) {
+		char outChar = emulator.memory[emulator.TERMINAL_DATA_OUT_REG];
+		emulator.memory[emulator.TERMINAL_DATA_OUT_REG + 1] = 1;
+		std::cout << outChar;
+		emulator.dataReady = false;
+	}
+}
+
+void Program::keyboardInterrupt(){
+	if (emulator.lastCharRead) {
+		emulator.lastCharRead = false;
+		emulator.memWrite(emulator.keyboardBuffer, emulator.TERMINAL_DATA_IN_REG);
+		emulator.memWrite(1, emulator.TERMINAL_DATA_IN_REG + 1); // used as status
+		emulator.keyboardInterrupt = false;
+	}
+}
+
+void Program::timerInterrupt(){
+
 }
 
 
