@@ -30,13 +30,26 @@ std::unordered_map<uint8_t, uint8_t> Emulator::timerDurations{
 };
 
 void Emulator::systemInit(){
-	registers.SP = STACK_START;
-	memory[TERMINAL_DATA_OUT_REG + 1] = 1;
-	memWriteWord(0, TIMER_CFG_REG);
-	lastTimerInterrupt = std::chrono::system_clock::now();
+	init = true;
+	PSW.val = 0;
+	loadIVT();
 
+	//registers.SP = STACK_START; // move to routine
+	//memory[TERMINAL_DATA_OUT_REG + 1] = 1; // move to routine
+	//memWriteWord(0, TIMER_CFG_REG); // move to routine
+
+	registers.PC = memReadWord(0); // first routine to run
+	lastTimerInterrupt = std::chrono::system_clock::now();
 	keyboardThread = new std::thread(Emulator::keyboardThreadRun);
 	keyboardThread->detach();
+	init = false;
+}
+
+void Emulator::loadIVT(){
+	systemLocationCounter = SYSTEM_ROUTINES_START;
+	startAddrs.clear();
+	loadProgramFromFile("cpuStartRoutine.exec");
+
 }
 
 void Emulator::regWrite(uint16_t val, uint8_t ind){
@@ -182,6 +195,7 @@ void Emulator::loadProgramFromFile(std::string filePath) {
 	}
 	else throw std::runtime_error("Invalid file format");
 
+	// read symbols and sections
 	ObjectFileReader::readSymbolandSectionTable(symTable, sectTable, in);
 
 	uint16_t size = 0;
@@ -223,9 +237,10 @@ void Emulator::loadProgramFromFile(std::string filePath) {
 
 void Emulator::placeSectionsAndFix(std::unordered_map<std::string, Section>& sectTable, std::unordered_map<unsigned short, Symbol> & symTable,uint8_t* data){
 	// check if sections overlap
-	size_t highestLocation = DEFAULT_PROG_OFFSET;
+	size_t highestLocation = init ? systemLocationCounter : DEFAULT_PROG_OFFSET;
 	for (auto const& startAddr : startAddrs) {
 		if (sectTable.find(startAddr.first) == sectTable.end()) throw std::runtime_error("No such section " + startAddr.first);
+		if (startAddr.second < SYSTEM_RESERVED_END) throw std::runtime_error("sections must be placed above " + SYSTEM_RESERVED_END);
 		size_t endAddr = startAddr.second + sectTable.at(startAddr.first).size;
 		if (highestLocation < endAddr) highestLocation = endAddr;
 		for (auto const& startAddrToCompare : startAddrs) {
@@ -270,7 +285,10 @@ void Emulator::placeSectionsAndFix(std::unordered_map<std::string, Section>& sec
 	// move starting point
 	programStart += startAddrs.at(".text") - symTable.at(sectTable.at(".text").rb).value; // assuming main is in text for now
 
-
+	if (init) {
+		memWriteWord(programStart, 0);
+		systemLocationCounter = highestLocation;
+	}
 
 }
 
@@ -318,11 +336,12 @@ Emulator & Emulator::operator=(const Emulator & emu) {
 
 void Emulator::emulate(std::string filePath, std::unordered_map<std::string, uint16_t>& stAddrs){
 	systemInit();
+
 	startAddrs = stAddrs;
 	loadProgramFromFile(filePath);
 	if (programSize > MAX_PROG_SIZE) throw std::runtime_error("Program too large to be ran");
 	program = new Program(*this);
-	registers.PC = programStart;
+	memWriteWord(programStart,USER_PROGRAM_START_LOCATION);
 	program->run();
 
 }

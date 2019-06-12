@@ -26,9 +26,13 @@ private:
 	static const uint16_t TERMINAL_DATA_OUT_REG = 0xFF00;
 	static const uint32_t TERMINAL_DATA_IN_REG = 0xFF02;
 	static const uint16_t TIMER_CFG_REG = 0xFF10;
+	static const uint16_t SYSTEM_ROUTINES_START = 0x12;
+	static const uint16_t SYSTEM_RESERVED_END = 0x100;
+	static const uint16_t USER_PROGRAM_START_LOCATION = 0x10;
 	static std::unordered_map<uint8_t, uint8_t> timerDurations; // for diffrent values of TIMER_CFG_REG
 
-
+	bool init;
+	uint16_t systemLocationCounter;
 	Program* program;
 	uint16_t programStart;
 	size_t programSize;
@@ -61,6 +65,7 @@ private:
 	} PSW;
 
 	void systemInit();
+	void loadIVT();
 
 	void regWrite(uint16_t val, uint8_t ind);
 	int16_t regRead(uint8_t ind);

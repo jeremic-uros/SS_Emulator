@@ -3,7 +3,7 @@
 #include <regex>
 #include <algorithm>
 #include <iostream>
-
+#include <string>
 
 
 Lexer* Lexer::lexer = nullptr;
@@ -25,7 +25,7 @@ std::queue<std::string>* Lexer::tokenize(std::string line)
 	int numOfMatchedChars = 0; // used to test if there are more chars than there should be
 	try {
 		std::smatch match;
-		std::regex allowedCharacters("([(a-z0-9\[&$*:\\]\.\\+\\-)]+)|,");
+		std::regex allowedCharacters("(([a-z0-9\\[&$*:\\]\\.\\+]|-)+)|,");
 		std::string temp = line;
 		while (std::regex_search(temp, match, allowedCharacters)) {
 			token = match.str(0);

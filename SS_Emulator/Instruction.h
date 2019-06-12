@@ -15,16 +15,16 @@ private:
 			2 - low or high for second opr 
 			3 - is pcrel [0 - false , 1 - true] , for creating relocation entries
 	*/
-	unsigned char operandAttributes=0;	
-	std::string firstOprField="";				//
-	unsigned char firstOprAddr=0;				//  only fields needed are filed, rest are undefined
-	std::string secondOprField="";				//
-	unsigned char secondOprAddr=0;				//
+	unsigned char operandAttributes;	
+	std::string firstOprField;				//
+	unsigned char firstOprAddr;				//  only fields needed are filed, rest are undefined
+	std::string secondOprField;				//
+	unsigned char secondOprAddr;				//
 protected:
 	void write(std::ostream& it) const override;
 public:
 	Instruction() : ParsedLine() {}
-	Instruction(unsigned char typ, std::string lbl, std::string nam="",unsigned char sz = 0) : ParsedLine(typ,lbl,nam,sz) {}
+	Instruction(unsigned char typ, std::string lbl, std::string nam="",unsigned char sz = 0) : ParsedLine(typ,lbl,nam,sz),firstOprField(""),firstOprAddr(0),secondOprField(""),secondOprAddr(0) {}
 	~Instruction() {}
 
 	unsigned char getOperandAttributes() const { return operandAttributes; }
@@ -76,7 +76,7 @@ public:
 		IRET = 25,
 	};
 
-	static std::unordered_map<Instruction::InstrCodes, std::string> instructionNames;
+	static std::unordered_map<unsigned short, std::string> instructionNames;
 	// possiblly refactoring needed
 	static std::unordered_map<std::string, unsigned char> addressingCodes;
 

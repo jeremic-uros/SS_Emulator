@@ -1,6 +1,9 @@
 #include "Instruction.h"
 #include "Util.h"
 #include <queue>
+#include <unordered_map>
+#include <string>
+#include <iostream>
 
 std::unordered_map<std::string, unsigned char> Instruction::instructionCodes = {
 			{"halt", 1},
@@ -67,36 +70,36 @@ std::unordered_map<std::string, unsigned char> Instruction::numOfOperands = {
 		{"iret", 0},
 };
 
-std::unordered_map<Instruction::InstrCodes, std::string> Instruction::instructionNames = {
-		{ HALT, "halt"},
-		{ XCHG, "xchg"},
-		{ INT, "int"},
-		{ MOV, "mov"},
-		{ ADD, "add"},
-		{ SUB, "sub"},
-		{ MUL, "mul"},
-		{ DIV, "div"},
-		{ CMP, "cmp"},
-		{ NOT , "not"},
-		{ AND , "and"},
-		{ OR , "or"},
-		{ XOR , "xor"},
-		{ TEST , "test"},
-		{ SHL , "shl"},
-		{ SHR , "shr"},
-		{ PUSH , "push"},
-		{ POP , "pop"},
-		{ JMP , "jmp"},
-		{ JEQ , "jeq"},
-		{ JNE , "jne"},
-		{ JGT , "jgt"},
-		{ CALL , "call"},
-		{ RET , "ret"},
-		{ IRET , "iret"},
+std::unordered_map<unsigned short, std::string> Instruction::instructionNames = {
+		{ 1, "halt"},
+		{ 2, "xchg"},
+		{ 3, "int"},
+		{ 4, "mov"},
+		{ 5, "add"},
+		{ 6, "sub"},
+		{ 7, "mul"},
+		{ 8, "div"},
+		{ 9, "cmp"},
+		{ 10 , "not"},
+		{ 11 , "and"},
+		{ 12 , "or"},
+		{ 13 , "xor"},
+		{ 14 , "test"},
+		{ 15 , "shl"},
+		{ 16 , "shr"},
+		{ 17 , "push"},
+		{ 18 , "pop"},
+		{ 19 , "jmp"},
+		{ 20 , "jeq"},
+		{ 21 , "jne"},
+		{ 22 , "jgt"},
+		{ 23 , "call"},
+		{ 24 , "ret"},
+		{ 25 , "iret"},
 };
 void Instruction::write(std::ostream & it) const {
 	ParsedLine::write(it);
-	it << (int)operandAttributes << delimiter << "fOpr=" + firstOprField << delimiter << (int)firstOprAddr << delimiter << "sOpr=" + secondOprField << delimiter << (int)secondOprAddr << delimiter;
+	it << (int) operandAttributes << (std::string) "!" << "fOpr=" + firstOprField << (std::string) "!" << (int)firstOprAddr; 		   	it <<  (std::string) "!" << "sOpr=" + secondOprField << (std::string) "!" << (int)secondOprAddr <<  (std::string) "!";
 }
 
 void Instruction::restore(std::string line) {

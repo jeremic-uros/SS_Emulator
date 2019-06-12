@@ -1,6 +1,8 @@
 #include "ParsedLine.h"
 #include "Util.h"
 #include <queue>
+#include <string>
+#include <iostream>
 
 void ParsedLine::write(std::ostream & it) const{
 	it << (int)type << delimiter << "label=" + label << delimiter << (int)size << delimiter << name << delimiter;

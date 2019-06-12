@@ -1,5 +1,7 @@
 #include "RelocationEntry.h"
 #include <iomanip>
+#include <iostream>
+#include <string>
 
 std::ostream & operator<<(std::ostream & it, const RelocationEntry & rel){
 	it << std::setw(10) << rel.offset << std::setw(10);

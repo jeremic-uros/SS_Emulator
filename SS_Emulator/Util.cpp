@@ -3,6 +3,8 @@
 #include <iomanip>
 #include <unordered_map>
 #include <regex>
+#include <string>
+#include <iostream>
 
 int util::convertStringToDecimal(std::string val){
 	std::stringstream ss;

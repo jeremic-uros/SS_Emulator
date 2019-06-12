@@ -13,7 +13,7 @@ std::string symbolRegex = "[a-z][a-z0-9]*";
 std::unordered_map<std::string, std::regex> Parser::tokenParsers = {
 	{"label", std::regex("^" + symbolRegex + ":$")},
 	{"instruction", std::regex("^(halt|xchg|int|mov|add|sub|mul|div|cmp|not|and|or|xor|test|shl|shr|push|pop|jmp|jeq|jne|jgt|call|ret|iret)(b|w)?$")},
-	{"directive", std::regex("^\.(text|data|bss|equ|global|extern|section|byte|word|align|skip|end)$")},
+	{"directive", std::regex("^\\.(text|data|bss|equ|global|extern|section|byte|word|align|skip|end)$")},
 	{"symbol", std::regex("^" + symbolRegex + "$")},
 	{"val",std::regex("^" + valRegex + "$")},
 	// instruction operands parsers
@@ -24,7 +24,7 @@ std::unordered_map<std::string, std::regex> Parser::tokenParsers = {
 	{"absolut", std::regex("^\\*" + valRegex + "$")},
 	{"symbolImm",std::regex("^&" + symbolRegex + "$")},
 	// directive params parsers
-	{"expr", std::regex("^(" + valRegex + "|" + symbolRegex + ")([\\+\\-\\*](" + valRegex + "|" + symbolRegex + "))*" + "$")},
+	{"expr", std::regex("^(" + valRegex + "|" + symbolRegex + ")([\\+\\-](" + valRegex + "|" + symbolRegex + "))*" + "$")},
 	{"sectionName",std::regex("^\\." + symbolRegex + "$")},
 	{"symbolArray", std::regex("^("+symbolRegex+"|,)$") }
 

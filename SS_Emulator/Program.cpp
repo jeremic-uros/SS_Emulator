@@ -210,7 +210,7 @@ void Program::keyboardInterrupt(){
 }
 
 void Program::timerInterrupt(){
-
+	//std::cout << "TIMER INTERRUPT\n";
 }
 
 

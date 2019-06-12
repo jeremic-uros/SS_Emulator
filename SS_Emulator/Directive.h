@@ -8,12 +8,12 @@
 
 class Directive : public ParsedLine {
 private:
-	std::string param = "";
+	std::string param;
 protected:
 	void write(std::ostream& it) const override;
 public:
-	Directive() : ParsedLine() {}
-	Directive(unsigned char typ, std::string lbl, std::string nam = "", unsigned char sz = 0) : ParsedLine(typ,lbl,nam,sz) {}
+	Directive() : ParsedLine(), param("") {}
+	Directive(unsigned char typ, std::string lbl, std::string nam = "", unsigned char sz = 0) : ParsedLine(typ,lbl,nam,sz),param("") {}
 
 	std::string getParam() { return param; }
 	void setParam(std::string parm) {	param = parm; }

@@ -1,6 +1,9 @@
 #include "Directive.h"
 #include "Util.h"
 #include <queue>
+#include <unordered_map>
+#include <string>
+#include <iostream>
 
 std::unordered_map<std::string, unsigned char> Directive::numOfParams = {
 	{"text",0},
@@ -29,7 +32,7 @@ std::unordered_map<std::string, std::string> Directive::directiveParsingGroup = 
 
 void Directive::write(std::ostream & it) const{
 	ParsedLine::write(it);
-	it << param << delimiter;
+	it << param << (std::string) "!";
 }
 
 void Directive::restore(std::string line){

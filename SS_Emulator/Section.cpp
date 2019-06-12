@@ -1,5 +1,7 @@
 #include "Section.h"
 #include <iomanip>
+#include <string>
+#include <iostream>
 
 void Section::addRelocationEntry(unsigned short offset, RelocationEntry::Type type, unsigned short symbol){
 	if (!relocationTable) relocationTable = new std::list<RelocationEntry>;

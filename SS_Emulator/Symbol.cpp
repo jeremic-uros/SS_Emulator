@@ -1,5 +1,7 @@
 #include "Symbol.h"
 #include <iomanip>
+#include <string>
+#include <iostream>
 
 std::ostream & operator<<(std::ostream & it, const Symbol & sym) {
 	it << std::setw(15) << sym.name << std::setw(10) << sym.section << std::setw(10) << sym.value;

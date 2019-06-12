@@ -2,6 +2,7 @@
 #ifndef _LEXER_H_
 #define _LEXER_H_
 #include <queue>
+#include <string>
 
 
 class Lexer {
