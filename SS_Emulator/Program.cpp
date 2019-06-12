@@ -177,6 +177,10 @@ void Program::execute(){
 
 void Program::handleInterrupts() {
 
+	if (emulator.keyboardInterrupt) {
+		keyboardInterrupt();
+	}
+
 	std::chrono::time_point<std::chrono::system_clock> timeNow = std::chrono::system_clock::now();
 	std::chrono::duration<double> elapsed = timeNow - emulator.lastTimerInterrupt;
 	uint8_t timerCFG = emulator.memory[emulator.TIMER_CFG_REG];
@@ -188,10 +192,6 @@ void Program::handleInterrupts() {
 		timerInterrupt();
 	}
 
-	if (emulator.keyboardInterrupt) {
-		keyboardInterrupt();
-	}
-
 	if (emulator.dataReady) {
 		char outChar = emulator.memory[emulator.TERMINAL_DATA_OUT_REG];
 		emulator.memory[emulator.TERMINAL_DATA_OUT_REG + 1] = 1;
@@ -201,16 +201,32 @@ void Program::handleInterrupts() {
 }
 
 void Program::keyboardInterrupt(){
+	if (emulator.PSW.I || emulator.PSW.Tl) return;
 	if (emulator.lastCharRead) {
 		emulator.lastCharRead = false;
 		emulator.memWrite(emulator.keyboardBuffer, emulator.TERMINAL_DATA_IN_REG);
 		emulator.memWrite(1, emulator.TERMINAL_DATA_IN_REG + 1); // used as status
+
+	
+		emulator.stackPushWord(emulator.registers.PC);
+		emulator.stackPushWord(emulator.PSW.val);
+		emulator.registers.PC = emulator.memReadWord(6);
+		emulator.PSW.I = 1;
 		emulator.keyboardInterrupt = false;
 	}
+
 }
 
 void Program::timerInterrupt(){
-	//std::cout << "TIMER INTERRUPT\n";
+	if (emulator.PSW.I || emulator.PSW.Tr) return;
+	else {
+
+
+		emulator.stackPushWord(emulator.registers.PC);
+		emulator.stackPushWord(emulator.PSW.val);
+		emulator.registers.PC = emulator.memReadWord(4);
+		emulator.PSW.I = 1;
+	}
 }
 
 
@@ -231,7 +247,8 @@ void Program::run() {
 	while (running) {
 		readInstruction();
 		execute();
-		handleInterrupts();
+		if(!std::regex_search(instName,std::regex("(int|iret|halt)")))
+				handleInterrupts();
 	}
 
 }

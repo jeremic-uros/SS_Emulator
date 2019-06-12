@@ -33,6 +33,7 @@ private:
 
 	bool init;
 	uint16_t systemLocationCounter;
+	uint8_t IVCounter;
 	Program* program;
 	uint16_t programStart;
 	size_t programSize;

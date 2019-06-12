@@ -47,9 +47,18 @@ void Emulator::systemInit(){
 
 void Emulator::loadIVT(){
 	systemLocationCounter = SYSTEM_ROUTINES_START;
+	IVCounter = 0;
 	startAddrs.clear();
 	loadProgramFromFile("cpuStartRoutine.exec");
-
+	IVCounter += 2;
+	startAddrs.clear();
+	loadProgramFromFile("badInstructionRoutine.exec");
+	IVCounter += 2;
+	startAddrs.clear();
+	loadProgramFromFile("defaultInterruptRoutine.exec");
+	IVCounter += 2;
+	startAddrs.clear();
+	loadProgramFromFile("defaultInterruptRoutine.exec");
 }
 
 void Emulator::regWrite(uint16_t val, uint8_t ind){
@@ -286,7 +295,7 @@ void Emulator::placeSectionsAndFix(std::unordered_map<std::string, Section>& sec
 	programStart += startAddrs.at(".text") - symTable.at(sectTable.at(".text").rb).value; // assuming main is in text for now
 
 	if (init) {
-		memWriteWord(programStart, 0);
+		memWriteWord(programStart, IVCounter);
 		systemLocationCounter = highestLocation;
 	}
 

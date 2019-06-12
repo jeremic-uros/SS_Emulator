@@ -1,0 +1,7 @@
+SIZE=1 START_POINT=0
+#sectab
+          .text         1         1
+#symtab
+          .text         1         0     LOCAL         1
+
+Ì
