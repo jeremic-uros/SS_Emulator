@@ -17,21 +17,12 @@ using namespace std;
 int main(int argc, char *argv[]) {
 
 	try {
-		// FOR TESTING ONLY
-		Assembler assembler("LinkingTest1.asm","LinkingTest1.txt");
-		assembler.assemble();
-		Assembler assembler1("LinkingTest2.asm", "LinkingTest2.txt");
-		assembler1.assemble();
-		Assembler assembler2("LinkingTest3.asm", "LinkingTest3.txt");
-		assembler2.assemble();
-			
-		///////////////////////////////////////
 		if (argc < 2) {
 			cerr << "Wrong number of parameters.\n Usage: emulator [-place=<section_name>@<location>] inputfiles\n";
 			return -1;
 		}
 
-	
+
 
 		regex placeRegex("-place=[a-z]+@[x0-9]+");
 		list<string> filenames;
