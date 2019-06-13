@@ -189,7 +189,7 @@ void Assembler::addSection(std::string name, unsigned short size, unsigned short
 signed short Assembler::handleSymbol(std::string name, RelocationEntry::Type type){
 	if (symbolTable.find(name) == symbolTable.end()) throw util::AssemblerException("ASSEMBLING ERROR: No such symbol " + name);
 	Symbol& sym = symbolTable.at(name);
-	if (sym.type == Symbol::Type::ABSOLUT) return sym.value;
+	if (sym.type == Symbol::Type::ABSOLUT || sym.type == Symbol::Type::ABSGLOBAL) return sym.value;
 	Section& sect = sectionTable.at(currentSection);
 	if (type == RelocationEntry::Type::R_386_32 || type == RelocationEntry::Type::R_386_N32) {
 		if (sym.type == Symbol::Type::GLOBAL) {
@@ -258,7 +258,9 @@ void Assembler::handleDirective(Directive * dir,std::ofstream& out){
 				std::string symName = paramTokens.front();
 				paramTokens.pop();
 				if (symbolTable.find(symName) == symbolTable.end()) throw util::AssemblerException("Symbol not defined nor extern " + symName);
-				symbolTable.at(symName).type = Symbol::Type::GLOBAL;
+				Symbol &sym = symbolTable.at(symName);
+				if(sym.type == Symbol::Type::ABSOLUT) sym.type = Symbol::Type::ABSGLOBAL;
+				else sym.type = Symbol::Type::GLOBAL;
 		}
 	}
 	else if (name == "byte" || name == "word") {
@@ -432,7 +434,7 @@ void Assembler::formatForLinker(){
 	// symbol table
 	out << "#symtab" << std::endl;
 	for (auto const& sym : symbolTable) {
-		if (sym.first != "UND" && (sym.second.type == Symbol::Type::GLOBAL || sym.second.section == sym.second.rb)) {
+		if (sym.first != "UND" && (sym.second.type == Symbol::Type::GLOBAL || sym.second.type == Symbol::Type::ABSGLOBAL || sym.second.section == sym.second.rb)) {
 			out << sym.second << std::endl;
 		}
 	}

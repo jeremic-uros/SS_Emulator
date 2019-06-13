@@ -8,7 +8,8 @@ public:
 	enum Type {
 		GLOBAL = 0,
 		LOCAL = 1,
-		ABSOLUT = 2
+		ABSOLUT = 2,
+		ABSGLOBAL = 3
 	};
 	std::string name;
 	unsigned short section;

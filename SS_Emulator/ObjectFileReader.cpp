@@ -34,8 +34,11 @@ void ObjectFileReader::readSymbolandSectionTable(std::unordered_map<unsigned sho
 			tokens.pop();
 			std::string type = tokens.front();
 			tokens.pop();
+			Symbol::Type typeS = Symbol::Type::ABSGLOBAL;
+			if (type == "GLOBAL")  typeS = Symbol::Type::GLOBAL;
+			else  if (type == "LOCAL")typeS = Symbol::Type::LOCAL;
 			uint16_t rb = util::convertStringToDecimal(tokens.front());
-			symTable.insert({ rb, Symbol(name,section,val,(type == "GLOBAL" ? Symbol::Type::GLOBAL : Symbol::Type::LOCAL),rb) });
+			symTable.insert({ rb, Symbol(name,section,val,typeS,rb) });
 		}
 	}
 	else throw std::runtime_error("ERROR READING FROM FILE: BAD FILE FORMAT");

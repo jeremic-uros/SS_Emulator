@@ -123,17 +123,19 @@ void Linker::addSymbols(){
 				if (symbol.second.section != 0) {
 					std::string sectionName = currentSymbolTable.at(symbol.second.section).name; 
 					symbol.second.section = sectionTable.at(sectionName).rb; // update section rb
-					symbol.second.value += sectionLocationCounterTable.at(sectionName); // update offset in section
+					if(symbol.second.type != Symbol::Type::ABSGLOBAL)
+						symbol.second.value += sectionLocationCounterTable.at(sectionName); // update offset in section
 				}
 			}
 			symbolTable.insert({ symbol.second.name, symbol.second });
 		}
 		else { //	found
 			Symbol& sym = symbolTable.at(symbol.second.name);
-			if (sym.section == 0) { // if symbol was undefined 
+			if (sym.section == 0 && symbol.second.section != 0) { // if symbol was undefined 
 				std::string sectionName = currentSymbolTable.at(symbol.second.section).name;
 				sym.section = sectionTable.at(sectionName).rb; // update section rb
-				sym.value = symbol.second.value + sectionLocationCounterTable.at(sectionName); // update offset in section
+				if(sym.type != Symbol::Type::ABSGLOBAL)
+					sym.value = symbol.second.value + sectionLocationCounterTable.at(sectionName); // update offset in section
 			}
 			else {
 				if (symbol.second.section == 0) continue; // undefined symbol already defined, skip ahead

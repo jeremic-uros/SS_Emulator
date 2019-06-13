@@ -143,6 +143,10 @@ void Emulator::memWriteWord(uint16_t val, uint16_t off){
 	uint8_t high = val >> 8;
 	memory[off] = low;
 	memory[off + 1] = high;
+	if (off == TERMINAL_DATA_OUT_REG) {
+		memory[off + 1] = 0;
+		dataReady = true;
+	}
 }
 
 uint8_t Emulator::memRead(uint16_t off){
@@ -157,8 +161,16 @@ uint8_t Emulator::memRead(uint16_t off){
 
 uint16_t Emulator::memReadWord(uint16_t off){
 	if (off > MEM_SIZE) throw std::runtime_error("memory index out of bounds");
-	uint16_t val = memory[off + 1] << 8;
-	val |= memory[off];
+	uint16_t val;
+	if (off == TERMINAL_DATA_IN_REG) {
+		memory[off + 1] = 0;
+		lastCharRead = true;
+		val = memory[off];
+	}
+	else {
+		val = memory[off + 1] << 8;
+		val |= memory[off];
+	}
 	return val;
 }
 

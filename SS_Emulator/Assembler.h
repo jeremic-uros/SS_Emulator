@@ -20,6 +20,7 @@ private:
 	std::string outputFileName;
 	std::unordered_map<std::string,Symbol> symbolTable;
 	std::unordered_map<std::string,Section> sectionTable;
+	std::list<std::string> globalAbsSymbols;
 
 	void firstRun();
 	void secondRun();
