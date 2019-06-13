@@ -11,8 +11,7 @@
 class Linker {
 private:
 	uint16_t symbolCounter;
-	std::string* fileNames;
-	uint8_t numOfFiles;
+	std::list<std::string> fileNames;
 	std::string outputFile;
 
 	std::unordered_map<std::string, Symbol> symbolTable;
@@ -38,7 +37,7 @@ private:
 
 	void output();
 public:
-	Linker(std::string* files,uint8_t num,std::string output) : fileNames(files),numOfFiles(num),outputFile(output) ,symbolCounter(1) {}
+	Linker(std::list<std::string> files, std::string output) : fileNames(files), outputFile(output), symbolCounter(1) {}
 
 	void link();
 

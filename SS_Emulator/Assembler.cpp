@@ -97,7 +97,7 @@ void Assembler::firstRun(){
 	}
 
 	// update last section size
-	sectionTable.at(currentSection).setSize(locationCounter);
+	if(assembling == false) sectionTable.at(currentSection).setSize(locationCounter);
 
 
 
@@ -257,6 +257,7 @@ void Assembler::handleDirective(Directive * dir,std::ofstream& out){
 		while (!paramTokens.empty()) {
 				std::string symName = paramTokens.front();
 				paramTokens.pop();
+				if (symbolTable.find(symName) == symbolTable.end()) throw util::AssemblerException("Symbol not defined nor extern " + symName);
 				symbolTable.at(symName).type = Symbol::Type::GLOBAL;
 		}
 	}

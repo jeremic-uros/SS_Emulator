@@ -10,13 +10,15 @@
 #include <regex>
 #include <queue>
 #include <cstdint>
+#include <queue>
 
 void Linker::firstPass(){
 	std::ifstream in;
+	
 
 	// collect symbols from all files
-	for (int i = 0; i < numOfFiles; i++) {
-		in.open(fileNames[i]);
+	for(auto filename : fileNames) {
+		in.open(filename);
 		loadSectionAndSymbolTable(in);
 		in.close();
 		addSections();
@@ -77,8 +79,8 @@ void Linker::secondPass(){
 	}
 	sectionData = new uint8_t[size];
 
-	for (int i = 0; i < numOfFiles; i++) {
-		in.open(fileNames[i]);
+	for (auto filename : fileNames) {
+		in.open(filename);
 		loadSectionAndSymbolTable(in);
 		loadSectionData(in);
 		loadRetTablesAndFix(in);
