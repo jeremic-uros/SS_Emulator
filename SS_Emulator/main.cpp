@@ -1,21 +1,12 @@
 
-#include "Lexer.h"
-#include "Parser.h"
 #include "AssemblerException.h"
-#include "Directive.h"
-#include "Instruction.h"
-#include "Linker.h"
 #include "Assembler.h"
-#include "Emulator.h"
-#include "Util.h"
 #include <string>
-#include <iostream>
-#include <queue>
 #include <iomanip>
-#include <sstream>
 #include <fstream>
 #include <cstdint>
 #include <stdint.h>
+#include <stdio.h>
 
 using namespace std;
 
@@ -23,9 +14,28 @@ using namespace std;
 int main(int argc, char *argv[]) {
 
 	try {
-		if (argc < 3) return -1;
-		std::string inputFile = argv[1];
-		std::string outputFile = argv[2];
+		if (argc != 4) {
+			cerr << "Wrong number of parameters.\n Usage: assembler -o outputfile inputfile\n";
+			return -1;
+		}
+		std::string inputFile;
+		std::string outputFile;
+		int args = 1;
+		while(args < argc){
+			string arg = argv[args];
+			if (arg == "-o") {
+				args++;
+				if (args == argc) {
+					cerr << "Expected file name after -o. \n Usage: assembler -o outputfile inputfile\n";
+					return -1;
+				}
+				outputFile = argv[args];
+			}
+			else {
+				inputFile = argv[args];
+			}
+			args++;
+		}
 		Assembler asembler(inputFile,outputFile);
 		asembler.assemble();
 	}
@@ -35,7 +45,5 @@ int main(int argc, char *argv[]) {
 	catch (std::runtime_error e) {
 		cerr << e.what() << endl;
 	}
-	int x;
-	cin >> x;
 	return 0;
 }
