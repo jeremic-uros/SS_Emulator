@@ -150,7 +150,7 @@
     <ClCompile Include="RelocationEntry.cpp" />
     <ClCompile Include="Section.cpp" />
     <ClCompile Include="Symbol.cpp" />
-    <ClCompile Include="Test.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="Parser.cpp" />
     <ClCompile Include="Util.cpp" />
   </ItemGroup>

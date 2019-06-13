@@ -195,6 +195,12 @@ void Linker::loadRetTablesAndFix(std::ifstream & in) {
 			Symbol& symbol = symbolTable.at(symName);
 			uint16_t newOffset = oldOffset + sectionLocationCounterTable.at(sectName); // oldOffset + run time start address of the section
 
+			// if absolut global symbol write data and skip
+			if (symbol.type == Symbol::Type::ABSGLOBAL) {
+				sectionData[newOffset] = symbol.value & 0xFF;
+				sectionData[newOffset + 1] = symbol.value >> 8;
+				continue;
+			}
 			// no need for reallocating if a undefined symbol is now defined in the same section and adr type is PC REl
 			if (currentSymbolTable.at(oldSymReff).section != 0 || 
 				symbol.section != sectionTable.at(sectName).rb ||
